@@ -9,6 +9,13 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 - **Sistema (con cuentas):** https://gaacb2003-alt.github.io/tamara/
 - **Versión original (referencia):** https://gaacb2003-alt.github.io/tamara/original.html
 
+## Dos páginas separadas
+
+- **Página del tribunal** (este enlace): para todas las personas. Portada, inicio de sesión, registro, avisos para leer y una burbuja de ayuda con orientación sin necesidad de entrar. No lleva el código de administración.
+- **Página de administración**: aparte, solo entran cuentas de administrador. Desde ahí se manejan perfiles, permisos, causas y se edita la portada de la página del tribunal.
+
+La seguridad la hace cumplir la base de datos (reglas por fila), no la página.
+
 ## Cómo funciona
 
 1. **Crear cuenta:** cada persona se registra con un nombre de usuario y una contraseña. Entra con acceso de orientación general.
@@ -31,5 +38,7 @@ Para presentar: entre como administrador y abra la **Guía de demostración**. E
 | `supabase/006_expediente_digital.sql` | Expediente digital: documentos en la nube con su huella SHA-256 |
 | `supabase/007_admin_cuentas.sql` | El administrador restablece contraseñas, cambia usuarios y elimina cuentas |
 | `supabase/008_juez_restablece_claves.sql` | El Juez también puede restablecer contraseñas (solo eso; nunca la del administrador) |
+| `supabase/009_pagina_editable.sql` | Portada y avisos de la página del tribunal: todos los ven, solo el administrador los cambia |
+| `supabase/010_editar_causas.sql` | Juez y Secretaría editan los datos de las causas (el administrador da o quita el permiso) |
 
 La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.
