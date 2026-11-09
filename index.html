@@ -452,6 +452,13 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .mtx th.c span{font-size:12.5px}
 .mtx td{vertical-align:middle}
 .mtx tr.gr td{background:var(--fill);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);padding:8px 12px}
+.gest{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 0 4px;border-top:1px solid var(--sep,#e5e5ea);margin-top:6px}
+.gest .lbl{width:100%}
+.btn.rojo{background:#D70015;color:#fff}
+.btn.rojo:hover{background:#B80012}
+.btn.rojo-t{color:#D70015}
+.lnk2.olv{align-self:center;background:none;border:0;cursor:pointer;margin-top:4px;font-family:inherit}
+.mfcampo{width:100%}
 .nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
 .nuevos h2{display:flex;align-items:center;gap:8px}
 .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
@@ -1167,6 +1174,7 @@ function detalleUsuario(u){const yo=u.id===ON.uid,adm=u.rol==="admin",dis=ON.ocu
  return `<div class="row" style="gap:14px;flex-wrap:nowrap;align-items:center">${avatar(u,"lg")}<div style="min-width:0;flex:1">${ON.editNom===u.id?`<div class="nedit"><input type="text" id="uNombre" value="${esc(u.nombre||"")}" maxlength="80" aria-label="Nombre" data-enter="unomsave"><button class="btn sm" data-act="unomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="unom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(u))}<button class="iconbtn" data-act="unom" data-v="${u.id}" aria-label="Editar nombre" title="Editar nombre">${ic("edit")}</button></h2>`}<p class="small t2">Usuario: <b>${esc(usuarioDe(u.correo))}</b> · Registrado el ${fLarga(String(u.creado).slice(0,10))}${u.uso?" · Se registró como: "+USON[u.uso]:""}<br>Último ingreso: ${ON.ultimo&&ON.ultimo[u.id]?new Date(ON.ultimo[u.id]).toLocaleString("es-VE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"todavía no ha entrado"}</p></div>${adm?"":`<button class="btn sec sm" data-act="ver" data-v="u:${u.id}">${ic("eye")}Ver como esta persona</button>`}</div>
 <div class="ugrid"><div class="stack" style="gap:8px"><span class="lbl">Perfil</span>${adm?`<p class="t2 small">Administrador: tiene todos los permisos.</p>`:`<select class="csel" data-change="urol" aria-label="Perfil de ${esc(nomU(u))}"${dis}>${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<option value="${r}"${u.rol===r?" selected":""}>${ROLN[r]}</option>`).join("")}</select><p class="xs t2">Al cambiar el perfil se cargan sus permisos sugeridos.</p>`}</div>
 <div class="stack" style="gap:8px"><span class="lbl">Cuenta</span><div class="prow" style="padding:6px 0;border:0"><span>${u.activo?"Activa":"Suspendida"}</span><button class="sw${u.activo?" on":""}" role="switch" aria-checked="${u.activo}" aria-label="Cuenta activa" data-act="uact"${yo?" disabled":dis}><i></i></button></div>${yo?`<p class="xs t2">No puede suspender su propia cuenta.</p>`:""}</div></div>
+<div class="gest"><span class="lbl">Modificar la cuenta</span><button class="btn sec sm" data-act="unom" data-v="${u.id}"${dis}>${ic("edit")}Cambiar nombre</button><button class="btn sec sm" data-act="uusu"${dis}>${ic("user")}Cambiar usuario</button><button class="btn sec sm" data-act="uclave"${dis}>${ic("lock")}Restablecer contraseña</button>${yo?"":`<button class="btn sec sm rojo-t" data-act="uborrar"${dis}>${ic("trash")}Eliminar cuenta</button>`}</div>
 <div class="pgrid"><div><h3 class="mb">Pantallas que puede ver</h3>${pant.map(fila).join("")}</div>
 <div><h3 class="mb">Acciones que puede hacer</h3>${acc.map(fila).join("")}${Object.keys(o).length&&!adm?`<button class="btn ghost sm" data-act="ureset"${dis}>${ic("refresh")}Volver a los permisos del perfil</button>`:""}
 <h3 style="margin-top:22px">Causas vinculadas</h3><p class="xs t2" style="margin:4px 0 10px">Para Abogado y Justiciable: las causas que puede abrir. Juez y Secretaría ven todas las del tribunal.</p>
@@ -1178,6 +1186,7 @@ function viewAcceso(fresh){const reg=ON.vista==="registro",f=ON.form,dis=ON.ocup
 <input type="text" id="lEmail" placeholder="Usuario" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(f.email||"")}" aria-label="Usuario">
 <input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña">${err}
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Entrando...":"Iniciar sesión"}</button>
+<button type="button" class="lnk2 olv" data-act="olvido">¿Olvidó su contraseña?</button>
 <div class="sep"><span>o</span></div><button type="button" class="btn sec block lg" data-act="vreg"${dis}>Crear cuenta nueva</button></form>`;
  const registro=`<form class="stack fbform" data-submit="registrar" novalidate><h2>Crear cuenta nueva</h2><p class="small t2" style="margin-top:-6px">Solo un usuario y una contraseña. El administrador le asigna su perfil después.</p>
 <input type="text" id="rEmail" placeholder="Usuario (sin espacios)" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(f.email||"")}" aria-label="Usuario">
@@ -1192,7 +1201,7 @@ function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para 
  return head("Mi perfil","Su foto y su nombre. Los ven usted y el administrador.")+`<div class="card perfilc">${avatar(p,"xl")}
 <div class="stack" style="gap:6px;flex:1;min-width:240px">${ON.editMine?`<div class="nedit"><input type="text" id="miNombre" value="${esc(p.nombre||"")}" maxlength="80" aria-label="Su nombre" data-enter="minomsave"><button class="btn sm" data-act="minomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="minom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(p))}<button class="iconbtn" data-act="minom" data-v="1" aria-label="Cambiar mi nombre" title="Cambiar mi nombre">${ic("edit")}</button></h2>`}
 <p class="t2">Usuario: <b>${esc(usuarioDe(p.correo))}</b> · Perfil: <b>${ROLN[p.rol]}</b>${p.uso?" · Se registró como "+USON[p.uso].toLowerCase():""}</p>
-<div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}</div>
+<div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}<button class="btn sec" data-act="miclave"${dis}>${ic("lock")}Cambiar mi contraseña</button></div>
 <p class="xs t3">En el teléfono puede tomarla con la cámara. La foto se recorta en cuadrado y se guarda en pequeño.</p></div></div>
 <div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>`}
 function vExpediente(){if(!ON.activo)return denied("El expediente digital necesita la base de datos conectada.");
@@ -1386,6 +1395,26 @@ A.ver=v=>{if(!ON.activo||!ON.perfil||ON.perfil.rol!=="admin")return"keep";
  else entrarPreview({rol:v,nombre:"el perfil "+ROLN[v],perm:new Set(ON.plant[v]||[]),causas:new Set(["DEMO-0001"])})};
 A.salirver=()=>{salirPreview()};
 A.atab=v=>{ON.atab=v};
+function modalForm(t,d,campo,act,boton,peligro){return()=>`<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="${esc(t)}" style="max-width:500px"><div class="mhd"><span class="itile sm${peligro?" gray":""}">${ic(peligro?"trash":"lock")}</span><h2>${esc(t)}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div><p class="t2 small">${d}</p>${campo}<div class="row"><button class="btn${peligro?" rojo":""}" data-act="${act}">${boton}</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}
+const campoTxt=(ph,act)=>`<input type="text" id="mfCampo" class="mfcampo" placeholder="${ph}" autocomplete="off" autocapitalize="none" spellcheck="false" data-enter="${act}">`;
+const enfocar=()=>setTimeout(()=>{const i=$("#mfCampo");if(i)i.focus()},0);
+const valorCampo=()=>(($("#mfCampo")||{}).value||"").trim();
+function rpcAdmin(fn,body,ok,msg,despues){S.modal=null;ON.ocupado=true;render();
+ rest("rpc/"+fn,{method:"POST",body:body}).then(()=>{if(despues)despues();S.modal=modalMsg(ok,msg)},e=>{S.modal=modalMsg("No se pudo completar",e.message)})
+  .then(()=>{ON.ocupado=false;ON.cargandoAdmin=false;return cargarAdmin()}).then(()=>render(),()=>render())}
+A.uclave=()=>{const u=selU();if(!u)return"keep";S.modal=modalForm("Restablecer contraseña","Escriba la nueva contraseña de <b>"+esc(nomU(u))+"</b> (usuario <b>"+esc(usuarioDe(u.correo))+"</b>). Después avísele cuál es.",campoTxt("Nueva contraseña (mínimo 4 caracteres)","uclaveok"),"uclaveok","Guardar contraseña");enfocar()};
+A.uclaveok=()=>{const u=selU(),c=valorCampo();if(!u)return"keep";if(c.length<4){S.modal=modalMsg("Contraseña muy corta","Use al menos 4 caracteres.");return}
+ rpcAdmin("admin_cambiar_clave",{p_usuario:u.id,p_clave:c},"Contraseña cambiada","La nueva contraseña de "+nomU(u)+" ya funciona. Avísele cuál es: con ella entra desde ahora.");return"keep"};
+A.uusu=()=>{const u=selU();if(!u)return"keep";S.modal=modalForm("Cambiar usuario","Usuario actual de <b>"+esc(nomU(u))+"</b>: <b>"+esc(usuarioDe(u.correo))+"</b>. Escriba el nuevo (letras y números, sin espacios). Su contraseña no cambia.",campoTxt("Nuevo usuario","uusuok"),"uusuok","Guardar usuario");enfocar()};
+A.uusuok=()=>{const u=selU(),n=valorCampo().toLowerCase();if(!u)return"keep";if(!/^[a-z0-9._-]{3,30}$/.test(n)){S.modal=modalMsg("Usuario no válido","Use de 3 a 30 letras o números, sin espacios ni tildes.");return}
+ rpcAdmin("admin_cambiar_usuario",{p_usuario:u.id,p_nuevo:n},"Usuario cambiado",nomU(u)+" ahora entra con el usuario "+n+" y su misma contraseña.");return"keep"};
+A.uborrar=()=>{const u=selU();if(!u||u.id===ON.uid)return"keep";S.modal=modalForm("Eliminar cuenta","Se borra la cuenta de <b>"+esc(nomU(u))+"</b> y ya no podrá entrar. Esto no se puede deshacer. Lo que hizo sigue en la bitácora. Para confirmar, escriba <b>ELIMINAR</b>.",campoTxt("ELIMINAR","uborrarok"),"uborrarok","Eliminar cuenta",true);enfocar()};
+A.uborrarok=()=>{const u=selU(),c=valorCampo().toUpperCase();if(!u)return"keep";if(c!=="ELIMINAR"){S.modal=modalMsg("No se eliminó","Para confirmar hay que escribir ELIMINAR.");return}
+ const n=nomU(u);rpcAdmin("admin_borrar_usuario",{p_usuario:u.id},"Cuenta eliminada","La cuenta de "+n+" fue eliminada.",()=>{ON.sel=null});return"keep"};
+A.miclave=()=>{S.modal=modalForm("Cambiar mi contraseña","Escriba su nueva contraseña (mínimo 6 caracteres). La próxima vez entrará con ella.",campoTxt("Nueva contraseña","miclaveok"),"miclaveok","Guardar contraseña");enfocar()};
+A.miclaveok=()=>{const c=valorCampo();if(c.length<6){S.modal=modalMsg("Contraseña muy corta","Use al menos 6 caracteres.");return}
+ S.modal=null;ON.ocupado=true;render();sbFetch("/auth/v1/user",{method:"PUT",body:{password:c}}).then(()=>{logEv("Perfil: contraseña cambiada");S.modal=modalMsg("Contraseña cambiada","Desde ahora entra con su nueva contraseña.")},e=>{S.modal=modalMsg("No se pudo cambiar",e.message)}).then(()=>{ON.ocupado=false;render()});return"keep"};
+A.olvido=()=>{S.modal=modalMsg("¿Olvidó su contraseña?","Pídale al administrador que se la restablezca. Le dará una contraseña nueva para entrar.")};
 A.asignar=v=>{const k=v.split("|"),u=(ON.usuarios||[]).find(x=>x.id===k[0]),r=k[1];if(!u||!ROLN[r])return"keep";ON.sel=u.id;
  tarea(async()=>{await rest("usuario_permisos?usuario=eq."+u.id,{method:"DELETE",prefer:"return=minimal"});await rest("perfiles?id=eq."+u.id,{method:"PATCH",body:{rol:r},prefer:"return=minimal"})},"Administración: perfil de "+nomU(u)+" asignado: "+ROLN[r]);return"keep"};
 /* El panel se actualiza solo si alguien se registra o cambia */
