@@ -607,13 +607,26 @@ a.btn{text-decoration:none}
 .fbtns{gap:8px;flex-wrap:nowrap;flex:none}
 .nversion{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:999px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.18);border:1px solid var(--sep);font-size:14px;font-weight:600;max-width:calc(100vw - 24px)}
 .nversion .ic{width:18px;height:18px;color:var(--blue);flex:none}
+.fnum input{max-width:160px}
+.anexos{border-top:1px solid var(--sep);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.anexos h3{display:flex;align-items:center;gap:8px;font-size:16px}
+.anexos h3 .ic{width:18px;height:18px;color:var(--blue)}
+.anrow{display:flex;align-items:center;gap:12px}
+.anrow .fmain{flex:1;min-width:0;display:flex;flex-direction:column}
+.anup{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.okmsg{display:flex;gap:6px;align-items:center;color:#1a7f37;font-size:14px;font-weight:500}
+.okmsg .ic{width:16px;height:16px}
+@media(max-width:560px){.anup{grid-template-columns:1fr}}
+.sb .me.arriba{border-top:0;border-bottom:1px solid var(--sep);margin:2px 0 10px;padding:10px 10px 14px}
 .nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
 .nuevos h2{display:flex;align-items:center;gap:8px}
 .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
 .nrow .umain{display:flex;flex-direction:column;min-width:0}
 .pill.nuevo{min-height:20px;padding:1px 8px;font-size:11px;vertical-align:2px}
 @media(max-width:900px){.nrow{grid-template-columns:38px minmax(0,1fr)}.nrow>.row{grid-column:1/-1}}
-.upgrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:10px;align-items:center}
+.upgrid{display:grid;grid-template-columns:96px minmax(0,1.2fr) minmax(0,1fr) auto;gap:10px;align-items:end}
+.dfol{display:flex;flex-direction:column;gap:4px}
+.dfol input{width:100%;padding:12px 10px;border:1px solid var(--sep2);border-radius:12px;font-size:15px;text-align:center}
 .drop{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px dashed var(--sep2);border-radius:12px;cursor:pointer;font-size:14px;color:var(--text2);min-height:46px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .drop:hover{border-color:var(--blue);color:var(--blue-d)}
 .drop.dis{opacity:.5;pointer-events:none}
@@ -910,7 +923,7 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 /* ========== Conexión con la base de datos (Supabase) ========== */
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 /* Dos páginas salen de este mismo archivo: "tribunal" (todas las personas) y "admin" (solo administración) */
-const VERSION="20261108-223230",MODO="tribunal",URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+const VERSION="20261108-225453",MODO="tribunal",URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
 SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["pagina","Página del tribunal"]);SCREENS.push(["perfil","Mi perfil"]);SCREENS.push(["expediente","Expediente digital"]);
@@ -974,15 +987,15 @@ async function cargarOnline(){
  const perms=await rest("rpc/mis_permisos",{method:"POST",body:{}});
  const perm=new Set((perms||[]).map(x=>x.modulo));
  const r=await Promise.all([rest("causas?select=*&order=id"),perm.has("ver_identificacion")?rest("causas_identificacion?select=*"):Promise.resolve([]),
-  rest("folios?select=causa,numero,titulo,texto&order=causa,numero"),rest("resumen?select=*&order=causa,orden"),rest("calendario_sin_despacho?select=fecha"),rest("documentos?select=*&order=causa,folio").catch(()=>[])]);
- const cs=r[0]||[],ids=r[1]||[],fs=r[2]||[],rs=r[3]||[],cal=r[4]||[],dcs=r[5]||[];
+  rest("folios?select=causa,numero,titulo,texto&order=causa,numero"),rest("resumen?select=*&order=causa,orden"),rest("calendario_sin_despacho?select=fecha"),rest("documentos?select=*&order=causa,folio").catch(()=>[]),perm.has("ver_anexos")?rest("folio_anexos?select=*&order=causa,folio,subido_en").catch(()=>[]):Promise.resolve([])]);
+ const cs=r[0]||[],ids=r[1]||[],fs=r[2]||[],rs=r[3]||[],cal=r[4]||[],dcs=r[5]||[],axs=r[6]||[];
  const prev=S.causa;
  ON.uid=uid;ON.perfil=ps[0];ON.perm=perm;ON.activo=true;
  CAUSAS.length=0;
  cs.forEach(c=>{const id=ids.find(x=>x.causa===c.id),folios={};
   fs.filter(f=>f.causa===c.id).forEach(f=>{folios[f.numero]=[f.titulo,f.texto.split(FIC).join("")]});
   CAUSAS.push(Object.assign({},c.datos||{},{id:c.id,corta:c.corta,materia:c.materia,actora:c.actora,demandada:c.demandada,etapa:c.etapa,inicio:c.inicio,lapso:c.lapso,
-   actId:id?id.actora_id:null,demId:id?id.demandada_id:null,folios,docs:dcs.filter(d=>d.causa===c.id),
+   actId:id?id.actora_id:null,demId:id?id.demandada_id:null,folios,docs:dcs.filter(d=>d.causa===c.id),anexos:axs.filter(a=>a.causa===c.id),
    sum:rs.filter(x=>x.causa===c.id).map(x=>({id:x.id,f:x.folio,t:x.tecnico,c:x.claro,st:x.estado==="validado"?"ok":"pend",edited:x.corregido}))}))});
  S.off=new Set(cal.map(x=>x.fecha));
  S.sums={};CAUSAS.forEach(c=>{S.sums[c.id]=c.sum});
@@ -996,15 +1009,18 @@ async function cargarOnline(){
 async function cerrarOnline(){const t=ON.tok;
  if(t)fetch(SB_URL+"/auth/v1/logout",{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+t.access_token}}).catch(()=>{});
  guardarSesion(null);
- Object.assign(ON,{gi:null,gdone:{},gtab:"pasos",atab:"personas",preview:null,allCausas:null,activo:false,tok:null,uid:null,perfil:null,perm:new Set(),usuarios:null,sel:null,bit:null,chainDb:null,err:"",msg:"",ocupado:false,adminErr:""});
+ Object.assign(ON,{firmaPers:undefined,gi:null,gdone:{},gtab:"pasos",atab:"personas",preview:null,allCausas:null,activo:false,tok:null,uid:null,perfil:null,perm:new Set(),usuarios:null,sel:null,bit:null,chainDb:null,err:"",msg:"",ocupado:false,adminErr:""});
  restaurarLocal()}
 /* Si el administrador cambia algo, la persona lo ve sin volver a entrar */
 let ultimoChequeo=0;
 async function verPermisos(){if(!ON.activo||Date.now()-ultimoChequeo<4000)return;ultimoChequeo=Date.now();
  try{const ps=await rest("perfiles?id=eq."+ON.uid+"&select=rol,activo");const perms=await rest("rpc/mis_permisos",{method:"POST",body:{}});
-  const nuevo=(perms||[]).map(x=>x.modulo).sort().join(),viejo=[...ON.perm].sort().join(),p=ps&&ps[0];
-  if(p&&(p.rol!==ON.perfil.rol||p.activo!==ON.perfil.activo||nuevo!==viejo)){const sc=S.screen;await cargarOnline();S.role=ON.perfil.rol;S.screen=can(sc)?sc:landing();
-   S.modal=modalMsg("Permisos actualizados","El administrador cambió su perfil o sus permisos. La pantalla ya muestra lo nuevo.");render()}}catch(e){}}
+  const ov=await rest("usuario_permisos?usuario=eq."+ON.uid+"&select=modulo,permitido").catch(()=>[]);
+  const nuevo=(perms||[]).map(x=>x.modulo).sort().join(),viejo=[...ON.perm].sort().join(),p=ps&&ps[0];if(!p)return;
+  /* aviso solo si el cambio fue a ESTA persona (su perfil, su estado o sus permisos propios); los cambios generales se aplican en silencio */
+  const firma=p.rol+"|"+p.activo+"|"+(ov||[]).map(x=>x.modulo+":"+x.permitido).sort().join(),personal=ON.firmaPers!==undefined&&firma!==ON.firmaPers;ON.firmaPers=firma;
+  if(personal||p.rol!==ON.perfil.rol||p.activo!==ON.perfil.activo||nuevo!==viejo){const sc=S.screen;await cargarOnline();S.role=ON.perfil.rol;S.screen=can(sc)?sc:landing();
+   if(personal)S.modal=modalMsg("Permisos actualizados","El administrador cambió su perfil o sus permisos. La pantalla ya muestra lo nuevo.");render()}}catch(e){}}
 async function cargarBitacora(){try{ON.bit=await rest("bitacora?select=id,hora,actor,accion,causa,prev,huella&order=id");}catch(e){ON.bit=[];S.modal=modalMsg("No se pudo leer la bitácora",e.message)}S.chainOk=null;ON.chainDb=null;S.tamper=null;render()}
 function horaIso(h){const m=String(h).match(/^(\d{4}-\d\d-\d\d)[T ](\d\d:\d\d:\d\d)(?:\.(\d+))?/);return m?m[1]+"T"+m[2]+"."+((m[3]||"")+"000000").slice(0,6)+"Z":String(h)}
 function verificarOnline(){let p="0".repeat(64);const b=ON.bit||[];for(let i=0;i<b.length;i++){const e=b[i];if(e.prev!==p||sha256(e.prev+horaIso(e.hora)+e.actor+e.accion)!==e.huella)return i;p=e.huella}return -1}
@@ -1066,6 +1082,9 @@ const ic=(n,c)=>`<svg class="ic${c?" "+c:""}" viewBox="0 0 24 24" fill="none" st
 const emb=c=>`<span class="emb${c?" "+c:""}" aria-hidden="true">${ic("scale")}</span>`;
 const SICON={expediente:"files",perfil:"user",usuarios:"users",pagina:"image",causas:"folder",inicio:"home",estado:"scale",resumen:"file",lapsos:"cal",orientacion:"chat",tiempo:"timer",seguridad:"shield",bitacora:"list"};
 const RICON={admin:"shield",juez:"gavel",secretaria:"clip",abogado:"brief",justiciable:"user",tercero:"userx"};
+/* Menú: Inicio primero y lo más importante arriba (la administración tiene su propio orden) */
+const gruposMenu=()=>S.role==="admin"?[["",["inicio"]],["Administración",["usuarios","pagina","bitacora"]],["Tribunal",["causas","estado","expediente","resumen","lapsos"]],["Ayuda",["orientacion"]],["Pruebas en vivo",["tiempo","seguridad"]]]
+ :[["",["inicio","causas","estado","expediente","resumen","lapsos"]],["Ayuda",["orientacion"]],["Registro",["bitacora"]],["Pruebas en vivo",["tiempo","seguridad"]]];
 const GROUPS=[["Tribunal",["causas"]],["Causa",["inicio","estado","resumen","expediente","lapsos"]],["Asistente",["orientacion"]],["Pruebas en vivo",["tiempo","seguridad","bitacora"]],["Administración",["usuarios","pagina"]]];
 
 /* ========== Render ========== */
@@ -1112,9 +1131,9 @@ function ring(p,size){const r=42,C=2*Math.PI*r;return `<svg viewBox="0 0 100 100
 
 function sidebar(){const r=ROLES[S.role],m=multi();
  return `<aside class="sb" aria-label="Navegación"><div class="brand">${emb("lg")}<div><b>Tamara</b><span>Asistente virtual tribunalicio</span></div></div>
-${GROUPS.filter(([g])=>(g!=="Tribunal"||m)&&(g!=="Administración"||S.role==="admin")).map(([g,ks])=>[g,ks.filter(k=>can(k)||!ON.activo)]).filter(([g,ks])=>ks.length).map(([g,ks])=>`<div class="ng"><span class="nl">${g==="Causa"&&m?"Causa · Exp. "+S.causa:g}</span>${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
+${ON.activo&&!ON.preview?`<button class="me mebtn arriba" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"md")}<div><b>${esc(quien())}</b><span>Perfil: ${r.nombre} · Ver mi perfil</span></div></button>`:`<div class="me arriba"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>`}
+${gruposMenu().map(([g,ks])=>[g,ks.filter(k=>can(k)||!ON.activo)]).filter(([g,ks])=>ks.length).map(([g,ks])=>`<div class="ng">${g?`<span class="nl">${g}</span>`:""}${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
 <div class="spacer"></div>
-${ON.activo&&!ON.preview?`<button class="me mebtn" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"md")}<div><b>${esc(quien())}</b><span>Perfil: ${r.nombre} · Ver mi perfil</span></div></button>`:`<div class="me"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>`}
 <button class="btn sec sm block" data-act="logout">${ic("logout")}${ON.activo?"Cerrar sesión":"Cambiar perfil"}</button></aside>`}
 function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="causas";
  const crumb=ter?`<div class="crumb"><b>Orientación general</b><span class="t2">Sin acceso a expedientes</span></div>`
@@ -1126,7 +1145,7 @@ ${ON.activo&&ON.perfil&&!ON.preview?`<button class="whochip hide-s" data-act="go
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo&&!esAdmin()?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
 ${ON.activo&&!ON.preview?`<button class="show-s mavbtn" data-act="go" data-v="perfil" aria-label="Mi perfil">${avatar(ON.perfil,"sm")}</button>`:""}<button class="iconbtn show-s" data-act="logout" aria-label="${ON.activo?"Cerrar sesión":"Cambiar perfil"}" title="${ON.activo?"Cerrar sesión":"Cambiar perfil"}">${ic("logout")}</button></div>
-<nav class="mnav" aria-label="Secciones">${SCREENS.filter(([k])=>k!=="perfil"&&(k!=="causas"||m)&&((k!=="usuarios"&&k!=="pagina")||S.role==="admin")&&(can(k)||!ON.activo)).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
+<nav class="mnav" aria-label="Secciones">${gruposMenu().reduce((a,g)=>a.concat(g[1]),[]).map(k=>SCREENS.find(x=>x[0]===k)).filter(Boolean).filter(([k])=>k!=="perfil"&&(k!=="causas"||m)&&((k!=="usuarios"&&k!=="pagina")||S.role==="admin")&&(can(k)||!ON.activo)).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
 function viewLogin(fresh){return S.demo?viewLoginDemo(fresh):viewAcceso(fresh)}
 function viewLoginDemo(fresh){const L=computeLapso(S.off);
  return band()+`<div class="auth${fresh?" anim":""}"><section class="hero"><div class="hero-txt">
@@ -1283,7 +1302,7 @@ function vBit(){const bad=S.chainOk,on=ON.activo,rows=on?(ON.bit||[]):S.log;
 ${on&&S.tamper!==null?`<div class="banner info">${ic("shield")}<p class="small">La alteración es solo en la copia que muestra esta pantalla. La base de datos no permite cambiar ni borrar entradas: al verificar, la base sigue íntegra.</p></div>`:""}
 ${rows.length?`<div class="scroll"><table class="tbl"><tr><th>N°</th><th>Hora</th><th>Perfil</th><th>Acción</th><th>Huella</th></tr>${rows.map((e,i)=>`<tr${bad===i?' class="badrow"':""}><td class="num t2">${i+1}</td><td class="num">${esc(hora(e))}</td><td>${esc(e.actor)}</td><td>${esc(e.accion)}</td><td class="hashc">${(on?e.huella:e.hash).slice(0,12)}...</td></tr>`).join("")}</table></div>`:`<p class="t2">Aún no hay entradas.</p>`}</div>`;
 }
-function modalFolio(n){const cid=folioCausa();return()=>{const f=folioDe(cid,n);const txt=cid==="DEMO-0001"&&n===47?S.sec.hashText:f.x;return `<div class="overlay" data-act="close"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Folio ${n}"><div class="mhd"><span class="itile sm">${ic("doc")}</span><div style="flex:1"><h2>Folio ${n}: ${esc(f.t)}</h2>${multi()?`<p class="xs t2" style="margin-top:2px">Exp. ${cid}</p>`:""}</div><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div><div class="paper">${esc(txt)}</div><p class="small t2">Huella SHA-256:</p><p class="hash">${sha256(txt)}</p><div><button class="btn" data-act="close">Cerrar</button></div></div></div>`}}
+function modalFolio(n){const cid=folioCausa();return()=>{const f=folioDe(cid,n);const txt=cid==="DEMO-0001"&&n===47?S.sec.hashText:f.x;return `<div class="overlay" data-act="close"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Folio ${n}"><div class="mhd"><span class="itile sm">${ic("doc")}</span><div style="flex:1"><h2>Folio ${n}: ${esc(f.t)}</h2>${multi()?`<p class="xs t2" style="margin-top:2px">Exp. ${cid}</p>`:""}</div><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div><div class="paper">${esc(txt)}</div><p class="small t2">Huella SHA-256:</p><p class="hash">${sha256(txt)}</p>${anexosHTML(cid,n)}<div><button class="btn" data-act="close">Cerrar</button></div></div></div>`}}
 function modalFix(id){return()=>{const i=S.summary.find(x=>x.id===id);return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Corregir"><div class="mhd"><span class="itile sm">${ic("edit")}</span><h2>Corregir la afirmación</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div><textarea id="fixt">${esc(i.t)}</textarea><div class="row"><button class="btn" data-act="savefix" data-v="${id}">Guardar corrección</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}}
 function modalMsg(t,b){return()=>`<div class="overlay" data-act="close"><div class="modal stack" role="dialog" aria-modal="true" aria-label="${esc(t)}" style="max-width:480px;text-align:center;align-items:center;padding:32px 28px"><span class="itile lg ${/denegado/i.test(t)?"gray":""}">${ic(/denegado/i.test(t)?"lock":/voz/i.test(t)?"vol":/^no se/i.test(t)?"alert":"checkc")}</span><h2>${esc(t)}</h2><p class="t2">${esc(b)}</p><div><button class="btn" data-act="close">Cerrar</button></div></div></div>`}
 
@@ -1302,16 +1321,15 @@ ${MODO==="tribunal"?`<div class="sep"><span>o</span></div><button type="button" 
 <p class="xs t2">Al crear la cuenta entra con acceso de orientación general hasta que el administrador le asigne su perfil.</p>
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Creando la cuenta...":"Crear cuenta"}</button>
 <button type="button" class="btn ghost" data-act="vlog"${dis}>¿Ya tiene cuenta? Iniciar sesión</button></form>`;
- if(MODO==="tribunal")return viewPortada(fresh,reg?registro:entrarCompacto(f,dis,err,msg),reg);
+ if(MODO==="tribunal")return viewPortada(fresh,entrarCompacto(f,dis,err,msg),false);
  return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="fb"><div class="fb-photo fondo" role="img" aria-label="Imágenes del tribunal">${slidesHTML([IMG.foto].concat(FONDOS_ADM))}<div class="fb-ov"><span class="eyebrow">Administración</span><h1 class="display">Tamara</h1><p class="lead">Perfiles, permisos y la página del tribunal se manejan desde aquí.</p></div></div>
 <div class="fb-r"><div class="card fbcard">${entrar}</div>${ACCESO_RAPIDO?`<div class="card rapido"><div class="row between"><h3>Acceso rápido</h3><span class="pill">Demostración</span></div><button class="btn block lg" data-act="rapido" data-v="admin"${dis}>${ic("shield")}Entrar como Administrador</button></div>`:""}<p class="small t2 fbnota">${ic("lock")}<span>Página de administración. Las demás personas entran por la página del tribunal.</span></p></div></section></div>`+foot()+`</div>`}
 function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para ver su perfil.");const p=ON.perfil,dis=ON.ocupado?" disabled":"";
- return head("Mi perfil","Su foto y su nombre. Los ven usted y el administrador.")+`<div class="card perfilc">${avatar(p,"xl")}
+ return head("Mi perfil","Sus datos en Tamara. Los ven usted y la administración.")+`<div class="card perfilc">${avatar(p,"xl")}
 <div class="stack" style="gap:6px;flex:1;min-width:240px">${ON.editMine?`<div class="nedit"><input type="text" id="miNombre" value="${esc(p.nombre||"")}" maxlength="80" aria-label="Su nombre" data-enter="minomsave"><button class="btn sm" data-act="minomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="minom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(p))}<button class="iconbtn" data-act="minom" data-v="1" aria-label="Cambiar mi nombre" title="Cambiar mi nombre">${ic("edit")}</button></h2>`}
 <p class="t2">Usuario: <b>${esc(usuarioDe(p.correo))}</b> · Perfil: <b>${ROLN[p.rol]}</b>${p.uso?" · Se registró como "+USON[p.uso].toLowerCase():""}</p>
-<div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}<button class="btn sec" data-act="miclave"${dis}>${ic("lock")}Cambiar mi contraseña</button></div>
-<p class="xs t3">En el teléfono puede tomarla con la cámara. La foto se recorta en cuadrado y se guarda en pequeño.</p></div></div>
-<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes",restablecer_claves:"Restablecer contraseñas",editar_causas:"Editar causas",crear_causas:"Crear causas",editar_folios:"Modificar folios"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>${tarjetaClaves()}`}
+<p class="xs t3" style="margin-top:6px">La foto de perfil y la cuenta las maneja la administración del tribunal.</p></div></div>
+<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes",restablecer_claves:"Restablecer contraseñas",editar_causas:"Editar causas",crear_causas:"Crear causas",editar_folios:"Modificar folios",ver_anexos:"Ver anexos"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>${tarjetaClaves()}`}
 function tarjetaClaves(){if(!puede("restablecer_claves")||(!ON.preview&&ON.perfil.rol==="admin"))return"";const dis=ON.ocupado?" disabled":"";
  if(ON.claveDe!==ON.uid){ON.claveDe=ON.uid;ON.claveLista=null;rest("rpc/personas_para_clave",{method:"POST",body:{}}).then(r=>{ON.claveLista=r||[]},e=>{ON.claveLista=[];ON.claveErr=e.message}).then(()=>render())}
  const l=ON.claveLista;
@@ -1322,13 +1340,13 @@ function vExpediente(){if(!ON.activo)return denied("El expediente digital necesi
  const textos=Object.keys(c.folios||{}).map(n=>({n:+n,t:c.folios[n][0]}));
  const filas=textos.concat(docs.map(d=>({n:d.folio,doc:d}))).sort((a,b)=>a.n-b.n);
  return head("Expediente digital","Exp. "+c.id+" · "+filas.length+" folios. Los documentos subidos se guardan en la nube y no se pueden modificar."+(puedeEditarFolio()?" Los folios de texto los puede corregir: cada cambio queda en la bitácora.":""))+
- (sub?`<div class="card stack"><div class="row between"><h2>Subir documento</h2><span class="pill info">${ic("hash")}Quedará como folio ${sig}</span></div>
-<div class="upgrid"><input type="text" id="dTitulo" placeholder="Título (por ejemplo: Escrito de promoción de pruebas)" maxlength="200" value="${esc(ON.docTitulo||"")}"${dis}>
+ (sub?`<div class="card stack"><div class="row between"><h2>Subir documento</h2><span class="pill info">${ic("hash")}Siguiente folio libre: ${sig}</span></div>
+<div class="upgrid"><label class="dfol"><span class="xs t2">Folio</span><input type="number" id="dFolio" min="1" max="99999" inputmode="numeric" value="${esc(String(ON.docFolio||sig))}" aria-label="Número de folio"${dis}></label><input type="text" id="dTitulo" placeholder="Título (por ejemplo: Escrito de promoción de pruebas)" maxlength="200" value="${esc(ON.docTitulo||"")}"${dis}>
 <label class="drop${ON.subiendo?" dis":""}" for="dArchivo"><span class="itile sm">${ic("upload")}</span><span id="dNombre">${ON.archivoNombre?esc(ON.archivoNombre):"Elegir PDF, JPG o PNG (máx. 10 MB)"}</span></label><input type="file" id="dArchivo" accept="application/pdf,image/jpeg,image/png" hidden>
 <button class="btn" data-act="subirdoc"${dis}>${ic("upload")}${ON.subiendo?"Subiendo...":"Subir al expediente"}</button></div>
 <p class="xs t3">Antes de subirlo se calcula su huella SHA-256. Queda registrado quién lo subió y cuándo, y se anota en la bitácora. En el teléfono puede fotografiar el documento.</p></div>`:"")+
  `<div class="card clist" style="margin-top:16px"><div class="chead"><h2>Folios del expediente</h2>${sub?"":`<span class="pill">${ic("lock")}Solo quien tiene permiso puede subir documentos</span>`}</div>
-${filas.length?filas.map(f=>f.doc?filaDoc(f.doc):`<div class="frow"><span class="fnum num">${f.n}</span><span class="fmain"><b>${esc(f.t)}</b><span class="xs t2">Texto del expediente</span></span><span class="row fbtns">${puedeEditarFolio()?`<button class="btn sec sm" data-act="efolio" data-v="${f.n}">${ic("edit")}Modificar</button>`:""}<button class="btn sec sm" data-act="folio" data-v="${f.n}">${ic("eye")}Ver</button></span></div>`).join(""):`<p class="t2" style="padding:16px 20px">Todavía no hay folios.</p>`}</div>`}
+${filas.length?filas.map(f=>f.doc?filaDoc(f.doc):`<div class="frow"><span class="fnum num">${f.n}</span><span class="fmain"><b>${esc(f.t)}</b><span class="xs t2">Texto del expediente${anxN(c,f.n)}</span></span><span class="row fbtns">${puedeEditarFolio()?`<button class="btn sec sm" data-act="efolio" data-v="${f.n}">${ic("edit")}Modificar</button>`:""}<button class="btn sec sm" data-act="folio" data-v="${f.n}">${ic("eye")}Ver</button></span></div>`).join(""):`<p class="t2" style="padding:16px 20px">Todavía no hay folios.</p>`}</div>`}
 function filaDoc(d){const tipo=/pdf/.test(d.tipo)?"PDF":"Imagen";
  return `<div class="frow"><span class="fnum num up">${d.folio}</span><span class="fmain"><b>${esc(d.titulo)}</b><span class="xs t2">${tipo} · ${tamTxt(d.tamano)} · subido por ${esc(d.subido_nombre||"sin dato")} el ${new Date(d.subido_en).toLocaleString("es-VE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><span class="xs t3">Huella ${d.huella.slice(0,16)}...</span></span><span class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sec sm" data-act="abrirdoc" data-v="${d.id}">${ic("eye")}Abrir</button><button class="btn sec sm" data-act="verifdoc" data-v="${d.id}">${ic("checkc")}Verificar</button></span></div>`}
 const tamTxt=b=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
@@ -1515,14 +1533,17 @@ async function subirDocumento(){const c=causaAct(),t=(ON.docTitulo||"").trim(),f
  if(!f)return aviso("Falta el archivo","Elija el documento en PDF, JPG o PNG.");
  if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type))return aviso("Formato no permitido","Solo se aceptan documentos PDF, JPG o PNG.");
  if(f.size>10485760)return aviso("Archivo muy grande","El máximo es 10 MB.");
+ const fo=parseInt(ON.docFolio||siguienteFolio(c),10),usados=new Set(Object.keys(c.folios||{}).map(Number).concat((c.docs||[]).map(d=>d.folio)));
+ if(!(fo>=1&&fo<=99999))return aviso("Número de folio no válido","Escriba un número de folio entre 1 y 99999.");
+ if(usados.has(fo))return aviso("Ese folio ya existe","El folio "+fo+" ya está en el expediente. Use otro número: el siguiente libre es el "+siguienteFolio(c)+".");
  ON.subiendo=true;render();
- try{const huella=await sha256Hex(await f.arrayBuffer()),folio=siguienteFolio(c);
+ try{const huella=await sha256Hex(await f.arrayBuffer()),folio=fo;
   const limpio=f.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9._-]+/g,"_").slice(-80);
   const path=c.id+"/"+String(folio).padStart(4,"0")+"-"+Date.now()+"-"+limpio;
   await subirArchivo(path,f);
   await rest("documentos",{method:"POST",body:{causa:c.id,folio:folio,titulo:t,archivo:path,tipo:f.type,tamano:f.size,huella:huella,subido_por:ON.uid},prefer:"return=minimal"});
   c.docs=await rest("documentos?causa=eq."+c.id+"&select=*&order=folio")||[];
-  ON.archivo=null;ON.archivoNombre="";ON.docTitulo="";
+  ON.archivo=null;ON.archivoNombre="";ON.docTitulo="";ON.docFolio="";
   S.modal=modalMsg("Documento subido","Quedó guardado en la nube como folio "+folio+" del Exp. "+c.id+", con su huella SHA-256, y se anotó en la bitácora.")}
  catch(e){S.modal=modalMsg("No se pudo subir el documento",e.message)}
  ON.subiendo=false;render()}
@@ -1533,7 +1554,7 @@ A.verifdoc=v=>{const d=buscarDoc(v);if(!d)return"keep";S.modal=modalMsg("Verific
  urlFirmada(d.archivo).then(u=>fetch(u)).then(r=>{if(!r.ok)throw new Error("No se pudo descargar el documento ("+r.status+").");return r.arrayBuffer()}).then(sha256Hex)
   .then(h=>{const ok=h===d.huella;S.modal=modalHuella(d,h,ok);logEv((ok?"Integridad verificada":"Alteración detectada")+": folio "+d.folio)},e=>{S.modal=modalMsg("No se pudo verificar",e.message)}).then(render);return"keep"};
 document.addEventListener("change",e=>{if(e.target.id!=="dArchivo")return;const f=e.target.files&&e.target.files[0];ON.archivo=f||null;ON.archivoNombre=f?f.name+" · "+tamTxt(f.size):"";const n=$("#dNombre");if(n)n.textContent=ON.archivoNombre||"Elegir PDF, JPG o PNG (máx. 10 MB)"});
-document.addEventListener("input",e=>{if(e.target.id==="dTitulo")ON.docTitulo=e.target.value});
+document.addEventListener("input",e=>{if(e.target.id==="dTitulo")ON.docTitulo=e.target.value;if(e.target.id==="dFolio")ON.docFolio=e.target.value});
 function saludar(){ON.toast="Hola, "+quien()+". Entró como "+ROLN[ON.perfil.rol]+".";clearTimeout(ON.toastT);ON.toastT=setTimeout(()=>{ON.toast="";const t=$(".toast");if(t)t.remove()},5000)}
 function guardarFoto(f){ON.ocupado=true;render();
  rest("perfiles?id=eq."+ON.uid,{method:"PATCH",body:{foto:f},prefer:"return=minimal"}).then(()=>{ON.perfil.foto=f;logEv(f?"Perfil: foto actualizada":"Perfil: foto quitada")},e=>{S.modal=modalMsg("No se pudo guardar la foto",e.message)}).then(()=>{ON.ocupado=false;ON.usuarios=null;render()})}
@@ -1563,9 +1584,10 @@ function modalCausa(){return()=>{const d=ON.cDraft||{},dis=ON.ocupado?" disabled
  return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Editar causa" style="max-width:640px"><div class="mhd"><span class="itile sm">${ic(d.nueva?"plus":"folder")}</span><h2>${d.nueva?"Nueva causa":"Editar Exp. "+esc(d.id)}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>
 <p class="t2 small">${d.nueva?"Registre la causa en el tribunal. Su expediente arranca vacío: los documentos se suben después en Expediente digital. Queda en la bitácora con su nombre.":"Cambie los datos que ve el tribunal. El cambio queda en la bitácora con su nombre."}</p>
 <div class="cgrid">${d.nueva?f("id","Número de expediente",25,"text",' placeholder="Ej.: EXP-2026-0007" autocapitalize="characters"'):""}${f("corta","Nombre corto",40)}${f("materia","Descripción (materia)",120)}${f("actora","Parte actora",120)}${f("demandada","Parte demandada",120)}${f("etapa","Etapa",60,"text",' list="etapasL"')}<datalist id="etapasL">${ETAPAS.map(e=>`<option value="${e}">`).join("")}</datalist>${f("inicio","Inicio del lapso",0,"date")}${f("lapso","Días de despacho del lapso",0,"number",' min="1" max="365" inputmode="numeric"')}</div>
-<p class="xs t3">Si deja vacíos el inicio y los días, la causa queda «sin lapso en curso».</p>${ON.cErr?`<p class="err">${ic("alert")}${esc(ON.cErr)}</p>`:""}
+<p class="xs t3">${d.nueva?"El número viene con el consecutivo que sigue en el tribunal; puede cambiarlo. ":""}Si deja vacíos el inicio y los días, la causa queda «sin lapso en curso».</p>${ON.cErr?`<p class="err">${ic("alert")}${esc(ON.cErr)}</p>`:""}
 <div class="row"><button class="btn" data-act="ecausaok"${dis}>${ON.ocupado?"Guardando...":d.nueva?"Crear causa":"Guardar cambios"}</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}}
-A.ncausa=()=>{if(!puedeCrearCausa())return"keep";ON.cErr="";ON.cDraft={nueva:true,id:"",corta:"",materia:"",actora:"",demandada:"",etapa:"Admisión",inicio:"",lapso:""};S.modal=modalCausa();
+function siguienteExpediente(){let mejor=null;(ON.allCausas||CAUSAS).forEach(c=>{const m=String(c.id).match(/^(.*?)(\d+)$/);if(m){const n=parseInt(m[2],10);if(!mejor||n>mejor.n)mejor={p:m[1],n,len:m[2].length}}});return mejor?mejor.p+String(mejor.n+1).padStart(mejor.len,"0"):"EXP-"+new Date().getFullYear()+"-0001"}
+A.ncausa=()=>{if(!puedeCrearCausa())return"keep";ON.cErr="";ON.cDraft={nueva:true,id:siguienteExpediente(),corta:"",materia:"",actora:"",demandada:"",etapa:"Admisión",inicio:"",lapso:""};S.modal=modalCausa();
  setTimeout(()=>{const i=document.querySelector('[data-ccampo="id"]');if(i)i.focus()},0)};
 A.ecausa=v=>{const c=CAUSAS.find(x=>x.id===v);if(!c||!puedeEditarCausa())return"keep";ON.cErr="";
  ON.cDraft={id:c.id,corta:c.corta,materia:c.materia,actora:c.actora,demandada:c.demandada,etapa:c.etapa,inicio:c.inicio||"",lapso:c.lapso||""};S.modal=modalCausa();
@@ -1589,18 +1611,23 @@ A.ecausaok=()=>{const d=ON.cDraft;if(!d)return"keep";const t=k=>String(d[k]==nul
 const puedeEditarFolio=()=>!!ON.activo&&puede("editar_folios");
 function modalFolioEd(){return()=>{const d=ON.fDraft||{},dis=ON.ocupado?" disabled":"";
  return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Modificar folio" style="max-width:680px"><div class="mhd"><span class="itile sm">${ic("doc")}</span><h2>Modificar folio ${d.n}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>
-<p class="t2 small">Exp. ${esc(d.causa)}. Al guardar se recalcula la huella SHA-256 y la bitácora guarda la huella anterior y la nueva, con su nombre.</p>
+<p class="t2 small">Exp. ${esc(d.causa)}. Al guardar se recalcula la huella SHA-256 y la bitácora guarda la huella anterior y la nueva, con su nombre. Si cambia el número, los resúmenes que citaban este folio pasan al número nuevo.</p>
+<label class="pfld fnum"><span>Número de folio</span><input type="number" id="feNum" min="1" max="99999" inputmode="numeric" value="${esc(String(d.num))}"></label>
 <label class="pfld"><span>Título</span><input type="text" id="feTit" maxlength="200" value="${esc(d.titulo||"")}"></label>
 <label class="pfld"><span>Texto del folio</span><textarea id="feTxt" rows="10" maxlength="20000">${esc(d.texto||"")}</textarea></label>
 ${ON.fErr?`<p class="err">${ic("alert")}${esc(ON.fErr)}</p>`:""}
 <div class="row"><button class="btn" data-act="efoliook"${dis}>${ON.ocupado?"Guardando...":"Guardar folio"}</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}}
-A.efolio=v=>{const c=causaAct(),n=+v,k=c&&c.folios&&c.folios[n];if(!k||!puedeEditarFolio())return"keep";ON.fErr="";ON.fDraft={causa:c.id,n,titulo:k[0],texto:k[1]};S.modal=modalFolioEd();setTimeout(()=>{const i=$("#feTit");if(i)i.focus()},0)};
-document.addEventListener("input",e=>{const t=e.target;if(!ON.fDraft)return;if(t.id==="feTit")ON.fDraft.titulo=t.value;else if(t.id==="feTxt")ON.fDraft.texto=t.value});
+A.efolio=v=>{const c=causaAct(),n=+v,k=c&&c.folios&&c.folios[n];if(!k||!puedeEditarFolio())return"keep";ON.fErr="";ON.fDraft={causa:c.id,n,num:n,titulo:k[0],texto:k[1]};S.modal=modalFolioEd();setTimeout(()=>{const i=$("#feTit");if(i)i.focus()},0)};
+document.addEventListener("input",e=>{const t=e.target;if(!ON.fDraft)return;if(t.id==="feTit")ON.fDraft.titulo=t.value;else if(t.id==="feTxt")ON.fDraft.texto=t.value;else if(t.id==="feNum")ON.fDraft.num=t.value});
 A.efoliook=()=>{const d=ON.fDraft;if(!d)return"keep";const ti=String(d.titulo||"").trim(),tx=String(d.texto||"");
  if(ti.length<2){ON.fErr="Escriba un título de al menos 2 letras.";return}if(!tx.trim()){ON.fErr="El texto del folio no puede quedar vacío.";return}
+ const nn=parseInt(d.num,10),c=CAUSAS.find(x=>x.id===d.causa)||{};
+ if(!(nn>=1&&nn<=99999)){ON.fErr="El número de folio debe estar entre 1 y 99999.";return}
+ if(nn!==d.n&&(Object.keys(c.folios||{}).map(Number).indexOf(nn)>=0||(c.docs||[]).some(x=>x.folio===nn))){ON.fErr="El folio "+nn+" ya existe en este expediente. Use otro número.";return}
+ const body={titulo:ti,texto:tx};if(nn!==d.n)body.numero=nn;
  ON.fErr="";ON.ocupado=true;render();
- rest("folios?causa=eq."+encodeURIComponent(d.causa)+"&numero=eq."+d.n,{method:"PATCH",body:{titulo:ti,texto:tx},prefer:"return=representation"})
-  .then(async r=>{if(!r||!r.length)throw new Error("La base no aceptó el cambio: su perfil no tiene permiso para modificar folios de esta causa.");ON.fDraft=null;await cargarOnline();S.modal=modalMsg("Folio modificado","El folio "+d.n+" quedó guardado. Su huella SHA-256 se recalculó y el cambio quedó en la bitácora.")},e=>{ON.fErr=e.message})
+ rest("folios?causa=eq."+encodeURIComponent(d.causa)+"&numero=eq."+d.n,{method:"PATCH",body,prefer:"return=representation"})
+  .then(async r=>{if(!r||!r.length)throw new Error("La base no aceptó el cambio: su perfil no tiene permiso para modificar folios de esta causa.");ON.fDraft=null;await cargarOnline();S.modal=modalMsg("Folio modificado",(nn!==d.n?"El folio "+d.n+" ahora es el folio "+nn+". ":"El folio "+nn+" quedó guardado. ")+"Su huella SHA-256 se recalculó y el cambio quedó en la bitácora.")},e=>{ON.fErr=e.message})
   .then(()=>{ON.ocupado=false;render()});return"keep"};
 
 /* ========== Versión nueva publicada: se actualiza sola o avisa con un botón ========== */
@@ -1614,6 +1641,43 @@ function mostrarVersion(){if(!ON.activo&&!S.modal&&quieto()){recargarNueva();ret
  el.innerHTML=`${ic("refresh")}<span>Hay una versión nueva de Tamara.</span><button class="btn sm" data-act="nversion">Actualizar</button>`}
 A.nversion=()=>{recargarNueva();return"keep"};
 setInterval(revisarVersion,60000);window.addEventListener("focus",revisarVersion);document.addEventListener("visibilitychange",()=>{if(!document.hidden)revisarVersion()});setTimeout(revisarVersion,5000);
+
+/* ========== Anexos dentro de cada folio (suben quienes modifican folios; los ven quienes tienen "ver_anexos") ========== */
+const anxN=(c,n)=>{const k=((c&&c.anexos)||[]).filter(a=>a.folio===n).length;return k?" · "+k+(k===1?" anexo":" anexos"):""};
+function anexosHTML(cid,n){const ver=puede("ver_anexos"),sub=puede("editar_folios");if(!ON.activo||(!ver&&!sub))return"";
+ const c=CAUSAS.find(x=>x.id===cid)||{},l=(c.anexos||[]).filter(a=>a.folio===n),dis=ON.subiendoAnx?" disabled":"";
+ const fila=a=>`<div class="anrow"><span class="itile sm">${ic(/pdf/.test(a.tipo)?"doc":"image")}</span><span class="fmain"><b>${esc(a.titulo)}</b><span class="xs t2">${esc(a.subido_nombre||"")} · ${new Date(a.subido_en).toLocaleDateString("es-VE",{day:"numeric",month:"short",year:"numeric"})} · ${tamTxt(a.tamano)}</span></span><button class="btn sec sm" data-act="abriranx" data-v="${a.id}">${ic("eye")}Abrir</button></div>`;
+ return `<div class="anexos"><div class="row between"><h3>${ic("files")}Anexos de este folio</h3>${ver?`<span class="pill">${l.length} ${l.length===1?"anexo":"anexos"}</span>`:""}</div>
+${ver?(l.length?l.map(fila).join(""):`<p class="small t2">Este folio todavía no tiene anexos.</p>`):""}
+${sub?`<div class="anup"><input type="text" id="anxTitulo" placeholder="Título del anexo (ej.: Copia del contrato)" maxlength="200" value="${esc(ON.anxTitulo||"")}"${dis}><label class="btn sec sm${ON.subiendoAnx?" dis":""}" for="anxArchivo">${ic("upload")}${ON.anxNombre?esc(ON.anxNombre):"Elegir archivo"}</label><input type="file" id="anxArchivo" accept="application/pdf,image/jpeg,image/png" hidden><button class="btn sm" data-act="subiranx" data-v="${n}"${dis}>${ON.subiendoAnx?"Subiendo...":"Subir anexo"}</button></div><p class="xs t3">PDF, JPG o PNG, máximo 10 MB. Queda con su huella SHA-256 y en la bitácora.</p>`:""}
+${ON.anxErr?`<p class="err">${ic("alert")}${esc(ON.anxErr)}</p>`:""}${ON.anxOk?`<p class="okmsg">${ic("checkc")}${esc(ON.anxOk)}</p>`:""}</div>`}
+const _folioAnx=A.folio;A.folio=v=>{ON.anxErr="";ON.anxOk="";ON.anxTitulo="";ON.anxArchivo=null;ON.anxNombre="";return _folioAnx(v)};
+document.addEventListener("change",e=>{if(e.target.id!=="anxArchivo")return;const f=e.target.files&&e.target.files[0];ON.anxArchivo=f||null;ON.anxNombre=f?f.name+" · "+tamTxt(f.size):"";ON.anxErr="";ON.anxOk="";render()});
+document.addEventListener("input",e=>{if(e.target.id==="anxTitulo")ON.anxTitulo=e.target.value});
+async function subirAnexo(n){const cid=folioCausa(),c=CAUSAS.find(x=>x.id===cid),t=(ON.anxTitulo||"").trim(),f=ON.anxArchivo;if(!c)return;
+ const mal=m=>{ON.anxErr=m;ON.anxOk="";render()};
+ if(t.length<2)return mal("Escriba un título de al menos 2 letras.");
+ if(!f)return mal("Elija el archivo: PDF, JPG o PNG.");
+ if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type))return mal("Solo se aceptan PDF, JPG o PNG.");
+ if(f.size>10485760)return mal("El archivo pesa más de 10 MB.");
+ ON.anxErr="";ON.anxOk="";ON.subiendoAnx=true;render();
+ try{const huella=await sha256Hex(await f.arrayBuffer());
+  const limpio=f.name.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9._-]+/g,"_").slice(-80);
+  const path=c.id+"/anexos/"+String(n).padStart(4,"0")+"-"+Date.now()+"-"+limpio;
+  await subirArchivo(path,f);
+  await rest("folio_anexos",{method:"POST",body:{causa:c.id,folio:n,titulo:t,archivo:path,tipo:f.type,tamano:f.size,huella:huella,subido_por:ON.uid},prefer:"return=minimal"});
+  c.anexos=(await rest("folio_anexos?causa=eq."+encodeURIComponent(c.id)+"&select=*&order=folio,subido_en").catch(()=>null))||c.anexos||[];
+  ON.anxArchivo=null;ON.anxNombre="";ON.anxTitulo="";ON.anxOk="Anexo subido al folio "+n+", con su huella SHA-256."}
+ catch(e){ON.anxErr=e.message}
+ ON.subiendoAnx=false;render()}
+A.subiranx=v=>{subirAnexo(+v);return"keep"};
+A.abriranx=v=>{const c=CAUSAS.find(x=>x.id===folioCausa()),a=c&&(c.anexos||[]).find(x=>String(x.id)===String(v));if(!a)return"keep";const w=window.open("about:blank","_blank");
+ urlFirmada(a.archivo).then(u=>{if(w)w.location.href=u;else location.href=u;logEv("Anexo consultado: folio "+a.folio+" · "+a.titulo)},e=>{if(w)w.close();ON.anxErr=e.message;render()});return"keep"};
+
+/* ========== Datos al día: con sesión, se recargan solos cada 30 s sin interrumpir; sin sesión, la portada cada 60 s ========== */
+setInterval(()=>{if(!ON.activo||ON.ocupado||S.modal||ON.preview||!quieto()||document.visibilityState!=="visible"||S.screen==="usuarios"||S.screen==="pagina"||ON.subiendo||ON.subiendoAnx)return;
+ ultimoChequeo=0;verPermisos().then(()=>{if(!ON.activo||S.modal)return;const sc=S.screen;return cargarOnline().then(()=>{if(!ON.activo)return;S.role=ON.perfil.rol;S.screen=can(sc)?sc:landing();if(quieto()&&!S.modal)render()})}).catch(()=>{})},30000);
+setInterval(()=>{if(!ON.activo&&!S.modal&&quieto()&&document.visibilityState==="visible")cargarPagina()},60000);
 
 /* ========== Burbuja de ayuda: orientación para cualquier persona, sin entrar ========== */
 ON.ayuda=[];ON.ayudaOpen=false;
@@ -1665,7 +1729,7 @@ function fueraDeLugar(){const adm=!!(ON.perfil&&ON.perfil.rol==="admin");
 function entrarCompacto(f,dis,err,msg){const p=PAG();return `<form class="stack fbform compacto" data-submit="entrar" novalidate>${p.entrarT?`<h2 class="pth">${esc(p.entrarT)}</h2>`:""}${p.entrarS?`<p class="small t2 ptsub">${esc(p.entrarS)}</p>`:""}${msg}
 <div class="g2c"><input type="text" id="lEmail" placeholder="Usuario" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(f.email||"")}" aria-label="Usuario"><input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña"></div>${err}
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Entrando...":"Iniciar sesión"}</button>
-<div class="row ptlinks"><span class="small t2">¿No tiene cuenta?</span><button type="button" class="lnk2" data-act="vreg"${dis}>Crear cuenta nueva</button></div></form>`}
+<p class="xs t2 ptnota">Su cuenta la crea la administración del tribunal.</p></form>`}
 function viewPortada(fresh,form,reg){const p=PAG(),dis=ON.ocupado?" disabled":"";
  const rap=ACCESO_RAPIDO&&!reg?`<div class="ptrap"><span class="xs t2">Acceso rápido de demostración</span><div class="rrow">${RAPIDO.map(([u,n,i])=>`<button class="rchip" data-act="rapido" data-v="${u}"${dis}>${ic(i)}${n}</button>`).join("")}</div></div>`:"";
  return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+avisosHTML(ON.avisos,p.avisosT,true)+foot()+ayudaHTML()+`</div>`}
