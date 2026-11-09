@@ -1,29 +1,30 @@
 # Constanza · Asistente virtual tribunalicio
 
-Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Caso y datos ficticios.
+Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y datos ficticios.
 
 ## Abrir
 
-- **Versión nueva:** https://gaacb2003-alt.github.io/constanza/
+- **Sistema (con cuentas):** https://gaacb2003-alt.github.io/constanza/
 - **Versión original (referencia):** https://gaacb2003-alt.github.io/constanza/original.html
 
-## Usarla sin internet
+## Cómo funciona
 
-Descargue `index.html` y ábralo con doble clic en cualquier navegador (Chrome, Edge, Firefox o Safari).
-Todo va dentro del archivo: textos, imágenes, letra y cálculos. No se instala nada y no guarda datos.
+1. **Crear cuenta:** cada persona se registra con su correo y contraseña. Entra con acceso de orientación general.
+2. **Verificación en dos pasos:** después de la contraseña se pide un código (en esta demostración: `482913`). Se pide una sola vez por sesión.
+3. **Administrador:** asigna a cada persona su perfil (Juez, Secretaría, Abogado, Justiciable o Tercero), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y puede suspender cuentas.
+4. **Juez y Secretaría** ven todas las causas del tribunal y pasan de una a otra sin repetir el código.
+5. **Todo queda guardado** en una base de datos SQL (Supabase / Postgres) con seguridad por fila: cada usuario solo puede leer lo que sus permisos le dejan. La bitácora está encadenada con SHA-256 y no se puede editar ni borrar.
 
-## Cómo se usa
-
-Dentro de la app, el botón **Guía de demostración** tiene dos pestañas:
-
-- **Recorrido:** 12 pasos con Anterior / Siguiente. Cada paso entra con el perfil correcto y abre la pantalla indicada.
-- **Cómo funciona:** qué es real (cálculo de lapsos, huella SHA-256, bitácora encadenada) y qué es simulado (respuestas programadas, caso ficticio).
-
-Código de demostración para entrar con cualquier perfil: `482913`.
+Sin cuenta: en la pantalla de entrada, **Abrir la demostración** recorre todo con los 5 perfiles y la guía paso a paso.
 
 ## Archivos
 
 | Archivo | Qué es |
 |---|---|
-| `index.html` | Versión nueva (rediseño), un solo archivo, funciona sin internet |
+| `index.html` | El sistema: un solo archivo, se conecta a la base de datos |
 | `original.html` | Versión original, sin cambios, como referencia |
+| `supabase/001_esquema.sql` | Tablas, funciones de seguridad y reglas de acceso (RLS) |
+| `supabase/002_datos.sql` | Datos iniciales ficticios: perfiles, 6 causas, folios y resúmenes |
+| `supabase/000_limpiar.sql`, `003_ajuste_bitacora.sql` | Limpieza para recrear desde cero y un ajuste de seguridad |
+
+La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.
