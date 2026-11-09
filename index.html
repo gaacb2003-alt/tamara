@@ -898,7 +898,7 @@ function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="c
   :m?`<div class="crumb"><b>${TRIB}</b><span class="t2">${CAUSAS.length} causas activas</span></div>`
   :`<div class="crumb"><b>${causaAct()?"Exp. "+causaAct().id:"Sin causas vinculadas"}</b><span class="t2">${TRIB}</span></div>`;
  return `<div class="tb">${crumb}<div class="spacer"></div>
-<span class="pill ok hide-s" title="El código se pidió una sola vez al entrar">${ic("checkc")}Sesión verificada</span>
+<span class="pill ok hide-s" title="Sesión iniciada con su cuenta">${ic("checkc")}Sesión iniciada</span>
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
 <button class="iconbtn show-s" data-act="logout" aria-label="${ON.activo?"Cerrar sesión":"Cambiar perfil"}" title="${ON.activo?"Cerrar sesión":"Cambiar perfil"}">${ic("logout")}</button></div>
@@ -934,7 +934,7 @@ const langToggle=()=>S.role==="abogado"||S.role==="juez"||S.role==="secretaria"?
 function vCausas(){
  const rows=CAUSAS.map(c=>({c,L:lapsoDe(c),pend:sumsOf(c.id).filter(x=>x.st!=="ok").length})).sort((a,b)=>(a.L?a.L.vence:"9999").localeCompare(b.L?b.L.vence:"9999"));
  const pronto=rows.filter(r=>r.L&&r.L.restantes<=3).length,porVal=rows.reduce((s,r)=>s+r.pend,0);
- return head("Causas del tribunal",TRIB+". Su sesión ya está verificada: abra cualquier causa sin repetir el código.")+
+ return head("Causas del tribunal",TRIB+". Abra cualquier causa activa del tribunal desde aquí.")+
 `<div class="grid g3 cstats"><div class="card stack" style="gap:6px"><div class="stat num">${CAUSAS.length}</div><p>causas activas</p></div>
 <div class="card stack" style="gap:6px"><div class="stat num">${pronto}</div><p>vencen en 3 días de despacho o menos</p></div>
 <div class="card stack" style="gap:6px"><div class="stat num">${porVal}</div><p>afirmaciones por validar</p></div></div>
@@ -1106,7 +1106,7 @@ function viewAcceso(fresh){const reg=ON.vista==="registro",f=ON.form,dis=ON.ocup
 <img class="fb-av" src="${IMG.avatar}" alt="Tamara, personaje con toga">
 <span class="eyebrow">Asistente virtual tribunalicio</span><h1 class="display">Tamara</h1>
 <p class="lead">Oriento sobre el proceso. No asesoro sobre el caso. Nunca decido.</p>
-<ol class="pasos"><li><b>Cree su cuenta</b><span>Con su correo y una contraseña.</span></li><li><b>Verifique que es usted</b><span>Un código de seis dígitos, una sola vez por sesión.</span></li><li><b>Reciba su perfil</b><span>El administrador decide qué puede ver y hacer: Juez, Secretaría, Abogado, Justiciable o Tercero.</span></li></ol></div>
+<ol class="pasos"><li><b>Cree su cuenta</b><span>Con su correo y una contraseña.</span></li><li><b>El administrador autoriza su perfil</b><span>Juez, Secretaría, Abogado, Justiciable o Tercero, y qué puede ver y hacer.</span></li><li><b>Entre y trabaje</b><span>Cada vez que entra ve solo lo que le corresponde.</span></li></ol></div>
 <div class="fb-r"><div class="card fbcard">${reg?registro:entrar}</div></div></section></div>`+foot()}
 const sinCausas=()=>`<div class="card denied"><span class="itile lg gray">${ic("folder")}</span><h2>Sin causas vinculadas</h2><p class="t2">Su cuenta todavía no tiene causas asignadas. El administrador debe vincularle las causas en las que participa.</p></div>`;
 const suspendida=()=>`<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Cuenta suspendida</h2><p class="t2">El administrador suspendió esta cuenta. Comuníquese con el tribunal para reactivarla.</p></div>`;
@@ -1129,7 +1129,7 @@ const GUIDE=[
 const COMO=[
  ["users","Cuentas y perfiles","Cada persona crea su cuenta con su correo. Entra con acceso de orientación general y el administrador le asigna su perfil: Juez, Secretaría, Abogado, Justiciable o Tercero."],
  ["shield","Permisos que decide el administrador","Cada perfil trae permisos sugeridos y el administrador puede encender o apagar pantallas y acciones por persona, y vincular causas a abogados y justiciables. La base de datos los hace cumplir, no solo la pantalla."],
- ["user","Cómo se entra","Correo y contraseña, y después el código de verificación ("+CODE+" en esta demostración). Juez y Secretaría verifican una sola vez y abren cualquier causa del tribunal sin repetir el código."],
+ ["user","Cómo se entra","Con su correo y su contraseña, directo a su perfil. Juez y Secretaría abren cualquier causa del tribunal desde la lista de causas."],
  ["checkc","Qué es real","Las cuentas, los permisos, las validaciones, el calendario y la bitácora se guardan en una base de datos SQL. El cálculo de los días de despacho y la huella SHA-256 de cada documento se calculan de verdad."],
  ["cpu","Qué es simulado","El caso y los datos son ficticios. Las respuestas de Tamara son programadas con fuentes cerradas: no hay un modelo de IA conectado."],
  ["eye","Para presentar","Entre como administrador. En Usuarios y permisos, «Ver la app como...» muestra exactamente lo que ve cada perfil o cada persona. Active o apague un permiso y véalo al momento."]
@@ -1214,7 +1214,7 @@ A.salirdemo=()=>{S.demo=false;S.pending=null};
 A.entrar=()=>{const email=(($("#lEmail")||{}).value||"").trim(),pass=($("#lPass")||{}).value||"";ON.form.email=email;ON.msg="";
  if(!email||!pass){ON.err="Escriba su correo y su contraseña.";return}
  ON.err="";ON.ocupado=true;
- (async()=>{try{const t=await sbFetch("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pass},auth:false});ON.tok=t;guardarSesion(t);await cargarOnline();S.pending="__online";S.codeErr=false}
+ (async()=>{try{const t=await sbFetch("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pass},auth:false});ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Inicio de sesión")}
   catch(e){ON.err=e.message;ON.tok=null;guardarSesion(null);ON.activo=false}ON.ocupado=false;render()})()};
 A.registrar=()=>{const nombre=(($("#rNombre")||{}).value||"").trim(),email=(($("#rEmail")||{}).value||"").trim(),pass=($("#rPass")||{}).value||"",uso=($("#rUso")||{}).value||"";
  Object.assign(ON.form,{nombre,email,uso});
@@ -1224,7 +1224,7 @@ A.registrar=()=>{const nombre=(($("#rNombre")||{}).value||"").trim(),email=(($("
  if(!uso){ON.err="Elija cómo va a usar Tamara.";return}
  ON.err="";ON.ocupado=true;
  (async()=>{try{const t=await sbFetch("/auth/v1/signup",{method:"POST",body:{email,password:pass,data:{nombre,uso}},auth:false});
-   if(t&&t.access_token){ON.tok=t;guardarSesion(t);await cargarOnline();S.pending="__online";S.codeErr=false}
+   if(t&&t.access_token){ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Cuenta creada e inicio de sesión")}
    else{ON.vista="login";ON.msg="Cuenta creada. Revise su correo para confirmarla y después inicie sesión."}}
   catch(e){ON.err=e.message}ON.ocupado=false;render()})()};
 const _verifyOnline=A.verify;A.verify=()=>{if(S.pending!=="__online")return _verifyOnline();
