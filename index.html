@@ -490,7 +490,8 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .rchip:hover{background:var(--fill)}
 .rchip:disabled{opacity:.5}
 .hchips{gap:8px}
-.avwrap{padding-top:8px;padding-bottom:8px}
+.avwrap{padding-top:8px;padding-bottom:8px;text-align:left}
+.avisos{text-align:left}
 .avisos h2{font-size:26px;letter-spacing:-.02em;font-weight:700;margin-bottom:14px}
 .avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .aviso{padding:0;overflow:hidden;display:flex;flex-direction:column}
@@ -575,6 +576,25 @@ a.btn{text-decoration:none}
 .pfx{position:absolute;top:6px;right:6px;width:28px;height:28px;background:rgba(255,255,255,.92)}
 .pfadd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--fill);color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;box-shadow:none;border:1.5px dashed var(--sep2)}
 .pfadd .ic{width:20px;height:20px}
+.guardado{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);z-index:80;display:flex;align-items:center;gap:8px;padding:10px 16px 10px 12px;border-radius:999px;background:rgba(29,29,31,.92);color:#fff;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.guardado.on{opacity:1;transform:translate(-50%,0)}
+.guardado .ic{width:18px;height:18px;color:#30D158}
+.uctl{display:flex;flex-direction:column;gap:10px;padding:0 14px 12px}
+.uctl2{justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:10px}
+.usort{max-width:240px;font-size:14px}
+.ufil{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ufc{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 12px;font-size:13px;white-space:nowrap;flex:none}
+.ufc .ufn{font-size:11.5px;color:var(--text3);font-weight:600}
+.ufc.on{background:var(--blue);color:#fff}.ufc.on .ufn{color:rgba(255,255,255,.8)}
+.ugh{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 14px;background:#F7F7F9;border-top:1px solid var(--sep);font-size:12.5px;font-weight:600;color:var(--text2)}
+.ugh span+span{font-weight:500;color:var(--text3)}
+.unada{padding:18px 14px}
+.whochip span.uav{display:grid;place-items:center;flex-direction:row;text-align:center;line-height:1;font-size:12px}
+.me span.uav{display:grid;place-items:center;font-size:14px;line-height:1;color:var(--text2)}
+.crumb .csel{min-width:0;max-width:300px;flex:0 1 auto}
+.crumb{overflow:hidden}
+@media(max-width:1600px){.crumb select+span{display:none}}
+@media(max-width:1380px){.tb .pill.net{display:none}}
 .nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
 .nuevos h2{display:flex;align-items:center;gap:8px}
 .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
@@ -909,7 +929,19 @@ async function sbFetch(path,o){o=o||{};const h={"apikey":SB_KEY,"Content-Type":"
  if(r.status===401&&o.auth!==false&&o.retry!==false&&ON.tok&&ON.tok.refresh_token){if(await refrescar())return sbFetch(path,Object.assign({},o,{retry:false}))}
  const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch(e){}
  if(!r.ok){const e=new Error(traducir(d&&(d.msg||d.message||d.error_description||d.error)||("Error "+r.status)));e.status=r.status;throw e}
+ if(esEscritura(path,o))avisoGuardado();
  return d}
+/* Aviso «Guardado»: sale cada vez que algo queda escrito en la base (no al navegar ni al entrar) */
+const esEscritura=(path,o)=>{const m=String(o.method||"GET").toUpperCase();if(m==="GET")return false;
+ if(path.indexOf("/auth/v1/user")===0)return m==="PUT";
+ if(path.indexOf("/rest/v1/")!==0)return false;const t=path.slice(9);
+ if(t.indexOf("bitacora")===0)return false;
+ if(t.indexOf("rpc/")===0)return /^rpc\/admin_/.test(t);
+ return true};
+let guardadoT=0;
+function avisoGuardado(){let el=document.getElementById("guardadoAviso");
+ if(!el){el=document.createElement("div");el.id="guardadoAviso";el.className="guardado";el.setAttribute("role","status");el.setAttribute("aria-live","polite");document.body.appendChild(el)}
+ el.innerHTML=ic("checkc")+"<span>Guardado en la base de datos</span>";el.classList.add("on");clearTimeout(guardadoT);guardadoT=setTimeout(()=>el.classList.remove("on"),2400)}
 const rest=(p,o)=>sbFetch("/rest/v1/"+p,o);
 async function refrescar(){if(!ON.tok||!ON.tok.refresh_token)return false;
  try{const t=await sbFetch("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:{refresh_token:ON.tok.refresh_token},auth:false,retry:false});ON.tok=t;guardarSesion(t);return true}catch(e){return false}}
@@ -1077,7 +1109,7 @@ function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="c
   :(m&&!enCausas)||(!m&&ON.activo&&CAUSAS.length>1)?`<div class="crumb"><select class="csel" data-change="abrir" aria-label="Cambiar de causa">${CAUSAS.map(x=>`<option value="${x.id}"${x.id===S.causa?" selected":""}>Exp. ${x.id} · ${x.corta}</option>`).join("")}</select><span class="t2">${TRIB}</span></div>`
   :m?`<div class="crumb"><b>${TRIB}</b><span class="t2">${CAUSAS.length} causas activas</span></div>`
   :`<div class="crumb"><b>${causaAct()?"Exp. "+causaAct().id:"Sin causas vinculadas"}</b><span class="t2">${TRIB}</span></div>`;
- return `<div class="tb">${m&&!enCausas&&!ter?`<button class="btn sec sm tbback" data-act="go" data-v="causas" title="Volver a la lista de causas">${ic("chev","flip")}<span class="hide-s">Causas</span></button>`:""}${crumb}<div class="spacer"></div>
+ return `<div class="tb">${m&&!ter&&["inicio","estado","resumen","expediente","lapsos"].includes(S.screen)?`<button class="btn sec sm tbback" data-act="go" data-v="causas" title="Volver a la lista de causas">${ic("chev","flip")}<span class="hide-s">Causas</span></button>`:""}${crumb}<div class="spacer"></div>
 ${ON.activo&&ON.perfil&&!ON.preview?`<button class="whochip hide-s" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"sm")}<span><b>${esc(quien())}</b><small>${ROLN[ON.perfil.rol]}</small></span></button>`:`<span class="pill ok hide-s" title="Sesión iniciada con su cuenta">${ic("checkc")}Sesión iniciada</span>`}
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo&&!esAdmin()?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
