@@ -452,6 +452,10 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .mtx th.c span{font-size:12.5px}
 .mtx td{vertical-align:middle}
 .mtx tr.gr td{background:var(--fill);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);padding:8px 12px}
+.nh{display:flex;align-items:center;gap:8px}
+.nh .iconbtn{width:30px;height:30px}
+.nedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.nedit input[type=text]{flex:1;min-width:180px;font-size:17px;font-weight:600;padding:9px 12px}
 .chip.tg{display:inline-flex;align-items:center;gap:6px}
 .chip.tg .ic{width:15px;height:15px}
 .chip.tg.on{background:var(--blue);color:#fff}
@@ -1120,7 +1124,7 @@ function detalleUsuario(u){const yo=u.id===ON.uid,adm=u.rol==="admin",dis=ON.ocu
  const pant=(ON.mods||[]).filter(m=>m.tipo==="pantalla"),acc=(ON.mods||[]).filter(m=>m.tipo==="accion"),o=ON.overr[u.id]||{};
  const fila=m=>{const on=efectivo(u,m.clave),aj=o[m.clave]!==undefined;return `<div class="prow"><span>${m.nombre}${aj?` <span class="pill info">Ajustado</span>`:""}</span><button class="sw${on?" on":""}" role="switch" aria-checked="${on}" aria-label="${esc(m.nombre)}" data-act="uperm" data-v="${m.clave}"${adm||!u.activo?" disabled":dis}><i></i></button></div>`};
  const vin=ON.vinc[u.id]||new Set();
- return `<div class="row" style="gap:14px;flex-wrap:nowrap;align-items:center"><span class="uav lg">${esc(iniciales(nomU(u)))}</span><div style="min-width:0;flex:1"><h2>${esc(nomU(u))}</h2><p class="small t2">Usuario: <b>${esc(usuarioDe(u.correo))}</b> · Registrado el ${fLarga(String(u.creado).slice(0,10))}${u.uso?" · Se registró como: "+USON[u.uso]:""}</p></div>${adm?"":`<button class="btn sec sm" data-act="ver" data-v="u:${u.id}">${ic("eye")}Ver como esta persona</button>`}</div>
+ return `<div class="row" style="gap:14px;flex-wrap:nowrap;align-items:center"><span class="uav lg">${esc(iniciales(nomU(u)))}</span><div style="min-width:0;flex:1">${ON.editNom===u.id?`<div class="nedit"><input type="text" id="uNombre" value="${esc(u.nombre||"")}" maxlength="80" aria-label="Nombre" data-enter="unomsave"><button class="btn sm" data-act="unomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="unom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(u))}<button class="iconbtn" data-act="unom" data-v="${u.id}" aria-label="Editar nombre" title="Editar nombre">${ic("edit")}</button></h2>`}<p class="small t2">Usuario: <b>${esc(usuarioDe(u.correo))}</b> · Registrado el ${fLarga(String(u.creado).slice(0,10))}${u.uso?" · Se registró como: "+USON[u.uso]:""}</p></div>${adm?"":`<button class="btn sec sm" data-act="ver" data-v="u:${u.id}">${ic("eye")}Ver como esta persona</button>`}</div>
 <div class="ugrid"><div class="stack" style="gap:8px"><span class="lbl">Perfil</span>${adm?`<p class="t2 small">Administrador: tiene todos los permisos.</p>`:`<select class="csel" data-change="urol" aria-label="Perfil de ${esc(nomU(u))}"${dis}>${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<option value="${r}"${u.rol===r?" selected":""}>${ROLN[r]}</option>`).join("")}</select><p class="xs t2">Al cambiar el perfil se cargan sus permisos sugeridos.</p>`}</div>
 <div class="stack" style="gap:8px"><span class="lbl">Cuenta</span><div class="prow" style="padding:6px 0;border:0"><span>${u.activo?"Activa":"Suspendida"}</span><button class="sw${u.activo?" on":""}" role="switch" aria-checked="${u.activo}" aria-label="Cuenta activa" data-act="uact"${yo?" disabled":dis}><i></i></button></div>${yo?`<p class="xs t2">No puede suspender su propia cuenta.</p>`:""}</div></div>
 <div class="pgrid"><div><h3 class="mb">Pantallas que puede ver</h3>${pant.map(fila).join("")}</div>
@@ -1316,6 +1320,11 @@ A.ver=v=>{if(!ON.activo||!ON.perfil||ON.perfil.rol!=="admin")return"keep";
  else entrarPreview({rol:v,nombre:"el perfil "+ROLN[v],perm:new Set(ON.plant[v]||[]),causas:new Set(["DEMO-0001"])})};
 A.salirver=()=>{salirPreview()};
 A.atab=v=>{ON.atab=v};
+A.unom=v=>{ON.editNom=v||null;if(v)setTimeout(()=>{const i=$("#uNombre");if(i){i.focus();i.select()}},0)};
+A.unomsave=()=>{const u=selU(),n=(($("#uNombre")||{}).value||"").trim().replace(/\s+/g," ");
+ if(!u)return"keep";if(n.length<2){S.modal=modalMsg("No se pudo guardar","Escriba un nombre de al menos 2 letras.");return}
+ ON.editNom=null;if(n===u.nombre)return;const viejo=nomU(u);
+ tarea(async()=>{await rest("perfiles?id=eq."+u.id,{method:"PATCH",body:{nombre:n},prefer:"return=minimal"});if(u.id===ON.uid)ON.perfil.nombre=n},"Administración: nombre de "+viejo+" cambiado a "+n);return"keep"};
 A.ostep=v=>{if(!esAdmin())return"keep";const i=+v;ON.gi=i;ON.gdone[i]=true;S.modal=null;Promise.resolve(GUIA_ON[i].run()).then(render,render)};
 A.onext=()=>A.ostep(ON.gi==null?0:Math.min(GUIA_ON.length-1,ON.gi+1));
 A.oprev=()=>{if(ON.gi==null||ON.gi===0)return"keep";return A.ostep(ON.gi-1)};
