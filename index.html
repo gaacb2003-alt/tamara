@@ -400,6 +400,12 @@ body.gfon .page{padding-bottom:110px}
 .fb-ov .eyebrow{color:#9CCBFF}.fb-ov .display{color:#fff}.fb-ov .lead{color:rgba(255,255,255,.9);max-width:520px}
 .fb-r{display:flex;flex-direction:column;justify-content:center;gap:26px}
 .fb-r .pasos{padding:0 6px}
+.rapido{padding:20px;display:flex;flex-direction:column;gap:12px}
+.rgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.rbtn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border-radius:14px;background:var(--fill);font-size:12.5px;font-weight:600;transition:background .15s}
+.rbtn:hover{background:var(--fill2)}
+.rbtn:disabled{opacity:.5}
+@media(max-width:420px){.rgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .emb{display:inline-grid;place-items:center;flex:none;width:36px;height:36px;border-radius:10px;background:linear-gradient(160deg,#1A8CFF 0%,#0071E3 55%,#005BC2 100%);color:#fff;box-shadow:0 2px 6px rgba(0,113,227,.25)}
 .emb .ic{width:58%;height:58%;stroke-width:1.9}
 .emb.sm{width:32px;height:32px;border-radius:9px}
@@ -1137,7 +1143,7 @@ function viewAcceso(fresh){const reg=ON.vista==="registro",f=ON.form,dis=ON.ocup
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Creando la cuenta...":"Crear cuenta"}</button>
 <button type="button" class="btn ghost" data-act="vlog"${dis}>¿Ya tiene cuenta? Iniciar sesión</button></form>`;
  return band()+`<div class="auth${fresh?" anim":""}"><section class="fb"><div class="fb-photo" style="background-image:url(${IMG.foto})" role="img" aria-label="Abogados conversando en las escaleras de un tribunal"><div class="fb-ov"><span class="eyebrow">Asistente virtual tribunalicio</span><h1 class="display">Tamara</h1><p class="lead">Oriento sobre el proceso. No asesoro sobre el caso. Nunca decido.</p></div></div>
-<div class="fb-r"><div class="card fbcard">${reg?registro:entrar}</div><ol class="pasos"><li><b>Cree su cuenta</b><span>Con un nombre de usuario y una contraseña.</span></li><li><b>El administrador autoriza su perfil</b><span>Juez, Secretaría, Abogado, Justiciable o Tercero, y qué puede ver y hacer.</span></li><li><b>Entre y trabaje</b><span>Cada vez que entra ve solo lo que le corresponde.</span></li></ol></div></section></div>`+foot()}
+<div class="fb-r"><div class="card fbcard">${reg?registro:entrar}</div>${ACCESO_RAPIDO&&!reg?`<div class="card rapido"><div class="row between"><h3>Acceso rápido</h3><span class="pill">Demostración</span></div><button class="btn block lg" data-act="rapido" data-v="admin"${dis}>${ic("shield")}Entrar como Administrador</button><div class="rgrid">${RAPIDO.map(([u,n,i])=>`<button class="rbtn" data-act="rapido" data-v="${u}"${dis}><span class="itile sm">${ic(i)}</span>${n}</button>`).join("")}</div></div>`:""}<ol class="pasos"><li><b>Cree su cuenta</b><span>Con un nombre de usuario y una contraseña.</span></li><li><b>El administrador autoriza su perfil</b><span>Juez, Secretaría, Abogado, Justiciable o Tercero, y qué puede ver y hacer.</span></li><li><b>Entre y trabaje</b><span>Cada vez que entra ve solo lo que le corresponde.</span></li></ol></div></section></div>`+foot()}
 const sinCausas=()=>`<div class="card denied"><span class="itile lg gray">${ic("folder")}</span><h2>Sin causas vinculadas</h2><p class="t2">Su cuenta todavía no tiene causas asignadas. El administrador debe vincularle las causas en las que participa.</p></div>`;
 const suspendida=()=>`<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Cuenta suspendida</h2><p class="t2">El administrador suspendió esta cuenta. Comuníquese con el tribunal para reactivarla.</p></div>`;
 
@@ -1270,7 +1276,12 @@ A.vreg=()=>{ON.vista="registro";ON.err="";ON.msg="";ON.form={}};
 A.vlog=()=>{ON.vista="login";ON.err=""};
 A.demo=()=>"keep";
 A.salirdemo=()=>{S.demo=false;S.pending=null};
-A.entrar=()=>{const usu=(($("#lEmail")||{}).value||"").trim(),pass=($("#lPass")||{}).value||"",email=aEmail(usu);ON.form.email=usu;ON.msg="";
+/* Acceso rápido de demostración: entra con las cuentas de prueba (clave 1234). Para quitarlo: ACCESO_RAPIDO=false */
+const ACCESO_RAPIDO=true,CLAVE_DEMO="1234";
+const RAPIDO=[["juez","Juez","gavel"],["secretaria","Secretaría","clip"],["abogado","Abogado","brief"],["justiciable","Justiciable","user"],["tercero","Tercero","userx"]];
+A.entrar=()=>entrarCon((($("#lEmail")||{}).value||"").trim(),($("#lPass")||{}).value||"");
+A.rapido=v=>{if(!ACCESO_RAPIDO)return"keep";entrarCon(v,CLAVE_DEMO)};
+function entrarCon(usu,pass){const email=aEmail(usu);ON.form.email=usu;ON.msg="";
  if(!usu||!pass){ON.err="Escriba su usuario y su contraseña.";return}
  ON.err="";ON.ocupado=true;
  (async()=>{try{const t=await sbFetch("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pass},auth:false});ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Inicio de sesión")}
