@@ -6,8 +6,8 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 
 ## Abrir
 
-- **Sistema (con cuentas):** https://gaacb2003-alt.github.io/constanza/
-- **Versión original (referencia):** https://gaacb2003-alt.github.io/constanza/original.html
+- **Sistema (con cuentas):** https://gaacb2003-alt.github.io/suju/
+- **Versión original (referencia):** https://gaacb2003-alt.github.io/suju/original.html
 
 ## Cómo funciona
 
