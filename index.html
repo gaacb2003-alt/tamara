@@ -618,6 +618,48 @@ a.btn{text-decoration:none}
 .okmsg .ic{width:16px;height:16px}
 @media(max-width:560px){.anup{grid-template-columns:1fr}}
 .sb .me.arriba{border-top:0;border-bottom:1px solid var(--sep);margin:2px 0 10px;padding:10px 10px 14px}
+/* Página principal estática: no se mueve; todo cabe en la pantalla (PC, tablet, Android, iPhone) */
+body.estatica{overscroll-behavior:none}
+body.estatica .pantalla{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+body.estatica .pantalla>.auth.fit{min-height:0;overflow:hidden}
+body.estatica .pt-izq{max-height:calc(100vh - 140px);max-height:calc(100dvh - 140px);overflow-y:auto;overscroll-behavior:contain}
+.ptavisos{align-self:flex-start;gap:8px}
+.ptavisos .ufn{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-t);border-radius:999px;padding:1px 8px}
+.mavisos{max-width:760px;max-height:84vh;overflow:auto}
+.mavisos .avgrid{grid-template-columns:1fr}
+.ptnota{margin-top:2px}
+@media(max-width:900px){
+ body.estatica .pantalla>header.band{position:relative;z-index:3}
+ body.estatica .pantalla>footer.foot{display:none}
+ body.estatica .pantalla>.auth.fit{padding:14px 14px calc(14px + env(safe-area-inset-bottom));justify-content:center}
+ body.estatica .portada{display:block}
+ body.estatica .pt-der{position:fixed;inset:0;z-index:0}
+ body.estatica .pt-der .hero-vis{position:absolute;inset:0;height:100%;min-height:0;aspect-ratio:auto;border-radius:0;box-shadow:none}
+ body.estatica .pt-izq{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:18px;border-radius:24px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);box-shadow:0 18px 50px rgba(0,0,0,.18);max-height:calc(100dvh - 64px - 28px - env(safe-area-inset-bottom))}
+ body.estatica .pt-izq .display{font-size:34px}
+ body.estatica .pt-izq .lead{font-size:16px}
+ body.estatica .ptlogin{box-shadow:none;border:1px solid var(--sep)}
+ body.estatica .rchip{box-shadow:none;border:1px solid var(--sep)}
+ body.estatica .dots{bottom:auto;top:12px}
+}
+@media(max-width:900px) and (max-height:760px){
+ body.estatica .pt-izq .lead,body.estatica .hchips,body.estatica .ptsub{display:none}
+ body.estatica .pt-izq .display{font-size:28px}
+ body.estatica .pt-izq{gap:10px;padding:14px}
+ body.estatica .pth{font-size:17px}
+}
+@media(max-width:900px) and (max-height:620px){
+ body.estatica .ptnota,body.estatica .ptrap>span,body.estatica .pt-izq .eyebrow{display:none}
+ body.estatica .pt-izq .display{font-size:24px}
+ body.estatica .g2c{grid-template-columns:1fr 1fr}
+ body.estatica .rchip{padding:6px 10px}
+ body.estatica .pt-izq{gap:8px;padding:12px}
+ body.estatica .ptlogin{padding:14px 16px}
+}
+@media(min-width:901px) and (max-height:680px){
+ body.estatica .pt-izq .lead,body.estatica .hchips{display:none}
+ body.estatica .pt-izq .display{font-size:40px}
+}
 .nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
 .nuevos h2{display:flex;align-items:center;gap:8px}
 .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
@@ -923,7 +965,7 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 /* ========== Conexión con la base de datos (Supabase) ========== */
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 /* Dos páginas salen de este mismo archivo: "tribunal" (todas las personas) y "admin" (solo administración) */
-const VERSION="20261108-225918",MODO="tribunal",URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+const VERSION="20261108-230237",MODO="tribunal",URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
 SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["pagina","Página del tribunal"]);SCREENS.push(["perfil","Mi perfil"]);SCREENS.push(["expediente","Expediente digital"]);
@@ -1111,7 +1153,7 @@ function render(){
  const c=$(".chat");if(c)c.scrollTop=c.scrollHeight;
  if($(".crow"))filtrarCausas();
 }
-function finish(){document.body.classList.toggle("gopen",S.guide);
+function finish(){document.body.classList.toggle("gopen",S.guide);document.body.classList.toggle("estatica",MODO==="tribunal"&&!ON.activo&&!S.demo&&!ON.restaurando);
  const db=$(".dbody"),keepG=db?db.scrollTop:0;
  document.querySelectorAll(".overlay,.drawer").forEach(e=>e.remove());
  if(S.modal){document.body.insertAdjacentHTML("beforeend",S.modal());if(!modalWas){const o=$(".overlay");if(o)o.classList.add("anim")}}
@@ -1717,7 +1759,7 @@ function heroInicio(c,L){if(!ON.activo)return"";const p=PAG(),n=!ON.preview&&ON.
  return portadaHero(q,{h:"h2",cls:"mini"})}
 const fechaAviso=d=>{try{return new Date(d).toLocaleDateString("es-VE",{day:"numeric",month:"long",year:"numeric"})}catch(e){return""}};
 function avisosHTML(lista,titulo,envolver){const l=(lista||[]).filter(a=>a.visible!==false);if(!l.length)return"";
- const h=`<section class="avisos"><h2>${esc(titulo||"Para leer")}</h2><div class="avgrid">${l.map(a=>`<article class="card aviso">${okFoto(a.imagen)?`<img class="avimg" src="${a.imagen}" alt="">`:""}<div class="stack" style="gap:6px">${a.creado?`<span class="xs t3">${fechaAviso(a.creado)}</span>`:""}<h3>${esc(a.titulo)}</h3>${a.texto?`<p class="small t2 avtxt">${esc(a.texto).replace(/\n/g,"<br>")}</p>`:""}</div></article>`).join("")}</div></section>`;
+ const h=`<section class="avisos">${titulo?`<h2>${esc(titulo)}</h2>`:""}<div class="avgrid">${l.map(a=>`<article class="card aviso">${okFoto(a.imagen)?`<img class="avimg" src="${a.imagen}" alt="">`:""}<div class="stack" style="gap:6px">${a.creado?`<span class="xs t3">${fechaAviso(a.creado)}</span>`:""}<h3>${esc(a.titulo)}</h3>${a.texto?`<p class="small t2 avtxt">${esc(a.texto).replace(/\n/g,"<br>")}</p>`:""}</div></article>`).join("")}</div></section>`;
  return envolver?`<div class="auth avwrap">${h}</div>`:h}
 const AV_PUB="/rest/v1/avisos?visible=eq.true&select=id,titulo,texto,imagen,visible,orden,creado&order=orden,creado.desc";
 const quieto=()=>{const a=document.activeElement;return !(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))};
@@ -1730,9 +1772,10 @@ function entrarCompacto(f,dis,err,msg){const p=PAG();return `<form class="stack 
 <div class="g2c"><input type="text" id="lEmail" placeholder="Usuario" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(f.email||"")}" aria-label="Usuario"><input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña"></div>${err}
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Entrando...":"Iniciar sesión"}</button>
 <p class="xs t2 ptnota">Su cuenta la crea la administración del tribunal.</p></form>`}
-function viewPortada(fresh,form,reg){const p=PAG(),dis=ON.ocupado?" disabled":"";
+function viewPortada(fresh,form,reg){const p=PAG(),dis=ON.ocupado?" disabled":"",navs=(ON.avisos||[]).filter(a=>a.visible!==false).length;
  const rap=ACCESO_RAPIDO&&!reg?`<div class="ptrap"><span class="xs t2">Acceso rápido de demostración</span><div class="rrow">${RAPIDO.map(([u,n,i])=>`<button class="rchip" data-act="rapido" data-v="${u}"${dis}>${ic(i)}${n}</button>`).join("")}</div></div>`:"";
- return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+avisosHTML(ON.avisos,p.avisosT,true)+foot()+ayudaHTML()+`</div>`}
+ return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}${navs?`<button class="btn sec sm ptavisos" data-act="veravisos">${ic("book")}${esc(p.avisosT||"Para leer")}<span class="ufn">${navs}</span></button>`:""}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+foot()+ayudaHTML()+`</div>`}
+A.veravisos=()=>{S.modal=()=>`<div class="overlay" data-act="close"><div class="modal stack mavisos" role="dialog" aria-modal="true" aria-label="Avisos"><div class="mhd"><span class="itile sm">${ic("book")}</span><h2 style="flex:1">${esc(PAG().avisosT||"Para leer")}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>${avisosHTML(ON.avisos,"")||'<p class="t2">No hay avisos por ahora.</p>'}</div></div>`};
 async function iniciar(){cargarPagina();const t=leerSesion();ON.restaurando=!!t;render();if(!t)return;ON.tok=t;
  try{if(!(await refrescar()))throw new Error("sesión vencida");await cargarOnline();if(fueraDeLugar())throw new Error("lugar");S.role=ON.perfil.rol;S.pending=null;
   let v=null;try{v=JSON.parse(sessionStorage.getItem(VISTA_K)||"null")}catch(e){}
