@@ -663,6 +663,17 @@ body.estatica .pt-izq{max-height:calc(100vh - 140px);max-height:calc(100dvh - 14
  body.estatica .pt-izq .display{font-size:40px}
 }
 .hbtns{gap:8px;margin-top:6px}
+.hamb,.sbcerrar,.sbfondo{display:none}
+@media(max-width:900px){
+ .hamb{display:inline-grid;flex:none;margin-right:2px}
+ .mnav{display:none!important}
+ aside.sb{display:flex;position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);z-index:85;transform:translateX(-105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 40px rgba(0,0,0,.25);padding-top:calc(18px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+ body.menuabierto aside.sb{transform:none}
+ body.menuabierto .sbfondo{display:block;position:fixed;inset:0;z-index:84;background:rgba(0,0,0,.35)}
+ body.menuabierto{overflow:hidden}
+ .sbcerrar{display:inline-grid;margin-left:auto;flex:none}
+ .sb .brand{align-items:center}
+}
 .nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
 .nuevos h2{display:flex;align-items:center;gap:8px}
 .nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
@@ -725,7 +736,6 @@ label.btn.dis{opacity:.5;pointer-events:none}
 @media(max-width:900px){
  .app{height:auto;display:block}
  .shell{display:block}
- aside.sb{display:none}
  .content{overflow:visible;display:block}
  .tb{padding:10px 16px;min-height:56px}
  .crumb span{display:none}
@@ -968,7 +978,7 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 /* ========== Conexión con la base de datos (Supabase) ========== */
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 /* Dos páginas salen de este mismo archivo: "tribunal" (todas las personas) y "admin" (solo administración) */
-const VERSION="20261108-232021",MODO="tribunal",LOCAL=false,URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+const VERSION="20261108-232628",MODO="tribunal",LOCAL=false,URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
 
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
@@ -1078,6 +1088,7 @@ const iniciales=n=>String(n||"?").trim().split(/\s+/).slice(0,2).map(x=>x.charAt
 
 /* ========== Iconos (trazo fino, estilo actual) ========== */
 const I={
+ menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
  image:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m20.5 16-4.6-4.6a1 1 0 0 0-1.4 0L5.5 20"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
@@ -1157,7 +1168,7 @@ function render(){
  const c=$(".chat");if(c)c.scrollTop=c.scrollHeight;
  if($(".crow"))filtrarCausas();
 }
-function finish(){document.body.classList.toggle("gopen",S.guide);document.body.classList.toggle("estatica",(MODO==="tribunal"||MODO==="local")&&!ON.activo&&!S.demo&&!ON.restaurando);
+function finish(){document.body.classList.toggle("gopen",S.guide);document.body.classList.toggle("menuabierto",!!S.menuAbierto&&!!S.role);document.body.classList.toggle("estatica",(MODO==="tribunal"||MODO==="local")&&!ON.activo&&!S.demo&&!ON.restaurando);
  const db=$(".dbody"),keepG=db?db.scrollTop:0;
  document.querySelectorAll(".overlay,.drawer").forEach(e=>e.remove());
  if(S.modal){document.body.insertAdjacentHTML("beforeend",S.modal());if(!modalWas){const o=$(".overlay");if(o)o.classList.add("anim")}}
@@ -1176,17 +1187,17 @@ const head=(t,sub,right)=>`<div class="head"><div><h1>${t}</h1>${sub?`<p class="
 function ring(p,size){const r=42,C=2*Math.PI*r;return `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#E8E8ED" stroke-width="9"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="#0071E3" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C*(1-p)).toFixed(2)}" transform="rotate(-90 50 50)"/></svg>`}
 
 function sidebar(){const r=ROLES[S.role],m=multi();
- return `<aside class="sb" aria-label="Navegación"><div class="brand">${emb("lg")}<div><b>Tamara</b><span>Asistente virtual tribunalicio</span></div></div>
+ return `<aside class="sb" aria-label="Navegación"><div class="brand">${emb("lg")}<div><b>Tamara</b><span>Asistente virtual tribunalicio</span></div><button class="iconbtn sbcerrar" data-act="menu" aria-label="Cerrar el menú">${ic("x")}</button></div>
 ${ON.activo&&!ON.preview?`<button class="me mebtn arriba" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"md")}<div><b>${esc(quien())}</b><span>Perfil: ${r.nombre} · Ver mi perfil</span></div></button>`:`<div class="me arriba"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>`}
 ${gruposMenu().map(([g,ks])=>[g,ks.filter(k=>can(k)||(!ON.activo&&MODO!=="local"))]).filter(([g,ks])=>ks.length).map(([g,ks])=>`<div class="ng">${g?`<span class="nl">${g}</span>`:""}${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
 <div class="spacer"></div>
-<button class="btn sec sm block" data-act="logout">${ic("logout")}${ON.activo?"Cerrar sesión":"Cambiar perfil"}</button></aside>`}
+<button class="btn sec sm block" data-act="logout">${ic("logout")}${ON.activo?"Cerrar sesión":"Cambiar perfil"}</button></aside><div class="sbfondo" data-act="menu" aria-hidden="true"></div>`}
 function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="causas";
  const crumb=ter?`<div class="crumb"><b>Orientación general</b><span class="t2">Sin acceso a expedientes</span></div>`
   :(m&&!enCausas)||(!m&&ON.activo&&CAUSAS.length>1)?`<div class="crumb"><select class="csel" data-change="abrir" aria-label="Cambiar de causa">${CAUSAS.map(x=>`<option value="${x.id}"${x.id===S.causa?" selected":""}>Exp. ${x.id} · ${x.corta}</option>`).join("")}</select><span class="t2">${TRIB}</span></div>`
   :m?`<div class="crumb"><b>${TRIB}</b><span class="t2">${CAUSAS.length} causas activas</span></div>`
   :`<div class="crumb"><b>${causaAct()?"Exp. "+causaAct().id:"Sin causas vinculadas"}</b><span class="t2">${TRIB}</span></div>`;
- return `<div class="tb">${m&&!ter&&["inicio","estado","resumen","expediente","lapsos"].includes(S.screen)?`<button class="btn sec sm tbback" data-act="go" data-v="causas" title="Volver a la lista de causas">${ic("chev","flip")}<span class="hide-s">Causas</span></button>`:""}${crumb}<div class="spacer"></div>
+ return `<div class="tb"><button class="iconbtn hamb" data-act="menu" aria-label="Abrir el menú" title="Menú">${ic("menu")}</button>${m&&!ter&&["inicio","estado","resumen","expediente","lapsos"].includes(S.screen)?`<button class="btn sec sm tbback" data-act="go" data-v="causas" title="Volver a la lista de causas">${ic("chev","flip")}<span class="hide-s">Causas</span></button>`:""}${crumb}<div class="spacer"></div>
 ${ON.activo&&ON.perfil&&!ON.preview?`<button class="whochip hide-s" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"sm")}<span><b>${esc(quien())}</b><small>${ROLN[ON.perfil.rol]}</small></span></button>`:`<span class="pill ok hide-s" title="Sesión iniciada con su cuenta">${ic("checkc")}Sesión iniciada</span>`}
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo&&!esAdmin()?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
@@ -1725,6 +1736,10 @@ setInterval(()=>{if(!ON.activo||ON.ocupado||S.modal||ON.preview||!quieto()||docu
  ultimoChequeo=0;verPermisos().then(()=>{if(!ON.activo||S.modal)return;const sc=S.screen;return cargarOnline().then(()=>{if(!ON.activo)return;S.role=ON.perfil.rol;S.screen=can(sc)?sc:landing();if(quieto()&&!S.modal)render()})}).catch(()=>{})},30000);
 setInterval(()=>{if(MODO!=="local"&&!ON.activo&&!S.modal&&quieto()&&document.visibilityState==="visible")cargarPagina()},60000);
 
+/* ========== Menú del teléfono: tres rayas que despliegan el menú lateral ========== */
+A.menu=()=>{S.menuAbierto=!S.menuAbierto};
+{const _goM=A.go;A.go=v=>{S.menuAbierto=false;return _goM(v)};const _outM=A.logout;A.logout=()=>{S.menuAbierto=false;return _outM()}}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.menuAbierto&&!S.modal){S.menuAbierto=false;render()}});
 /* ========== Burbuja de ayuda: orientación para cualquier persona, sin entrar ========== */
 ON.ayuda=[];ON.ayudaOpen=false;
 const AYUDA_SUG=["¿Qué es un día de despacho?","¿Qué significa que me citaron?","¿Qué pasa si no contesto?","¿Qué sigue después?","¿Dónde consigo un abogado?","¿Voy a ganar el juicio?"];
@@ -1779,7 +1794,7 @@ function entrarCompacto(f,dis,err,msg){const p=PAG();return `<form class="stack 
 <p class="xs t2 ptnota">Su cuenta la crea la administración del tribunal.</p></form>`}
 function viewPortada(fresh,form,reg){const p=PAG(),dis=ON.ocupado?" disabled":"",navs=(ON.avisos||[]).filter(a=>a.visible!==false).length;
  const rap=ACCESO_RAPIDO&&!reg?`<div class="ptrap"><span class="xs t2">Acceso rápido de demostración</span><div class="rrow">${RAPIDO.map(([u,n,i])=>`<button class="rchip" data-act="rapido" data-v="${u}"${dis}>${ic(i)}${n}</button>`).join("")}</div></div>`:"";
- return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}${navs?`<button class="btn sec sm ptavisos" data-act="veravisos">${ic("book")}${esc(p.avisosT||"Para leer")}<span class="ufn">${navs}</span></button>`:""}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+foot()+ayudaHTML()+`</div>`}
+ return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+foot()+ayudaHTML()+`</div>`}
 A.veravisos=()=>{S.modal=()=>`<div class="overlay" data-act="close"><div class="modal stack mavisos" role="dialog" aria-modal="true" aria-label="Avisos"><div class="mhd"><span class="itile sm">${ic("book")}</span><h2 style="flex:1">${esc(PAG().avisosT||"Para leer")}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>${avisosHTML(ON.avisos,"")||'<p class="t2">No hay avisos por ahora.</p>'}</div></div>`};
 async function iniciar(){cargarPagina();const t=leerSesion();ON.restaurando=!!t;render();if(!t)return;ON.tok=t;
  try{if(!(await refrescar()))throw new Error("sesión vencida");await cargarOnline();if(fueraDeLugar())throw new Error("lugar");S.role=ON.perfil.rol;S.pending=null;
