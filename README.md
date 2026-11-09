@@ -1,4 +1,4 @@
-# Sujú · Asistente virtual tribunalicio
+# Tamara · Asistente virtual tribunalicio
 
 (Antes llamada Constanza; `original.html` conserva la versión original con ese nombre.)
 
@@ -6,8 +6,8 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 
 ## Abrir
 
-- **Sistema (con cuentas):** https://gaacb2003-alt.github.io/suju/
-- **Versión original (referencia):** https://gaacb2003-alt.github.io/suju/original.html
+- **Sistema (con cuentas):** https://gaacb2003-alt.github.io/tamara/
+- **Versión original (referencia):** https://gaacb2003-alt.github.io/tamara/original.html
 
 ## Cómo funciona
 
