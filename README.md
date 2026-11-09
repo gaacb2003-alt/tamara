@@ -42,5 +42,6 @@ Para presentar: entre como administrador y abra la **Guía de demostración**. E
 | `supabase/010_editar_causas.sql` | Juez y Secretaría editan los datos de las causas (el administrador da o quita el permiso) |
 | `supabase/011_admin_crea_cuentas.sql` | El administrador crea cuentas desde su panel (emergencias) |
 | `supabase/012_crear_causas.sql` | Crear causas nuevas: el administrador siempre; a otros si les da el permiso |
+| `supabase/013_editar_folios.sql` | Juez y Secretaría modifican folios; la bitácora guarda la huella anterior y la nueva |
 
 La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.
