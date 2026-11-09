@@ -11,12 +11,12 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 
 ## Cómo funciona
 
-1. **Crear cuenta:** cada persona se registra con su correo y contraseña. Entra con acceso de orientación general.
+1. **Crear cuenta:** cada persona se registra con un nombre de usuario y una contraseña. Entra con acceso de orientación general.
 2. **Administrador:** asigna a cada persona su perfil (Juez, Secretaría, Abogado, Justiciable o Tercero), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y puede suspender cuentas.
 3. **Juez y Secretaría** ven todas las causas del tribunal y pasan de una a otra.
 4. **Todo queda guardado** en una base de datos SQL (Supabase / Postgres) con seguridad por fila: cada usuario solo puede leer lo que sus permisos le dejan. La bitácora está encadenada con SHA-256 y no se puede editar ni borrar.
 
-Para presentar: entre como administrador y use **Ver la app como...** en Usuarios y permisos para mostrar lo que ve cada perfil o cada persona.
+Para presentar: entre como administrador y abra la **Guía de demostración**. El recorrido de 14 pasos abre cada perfil con **Ver la app como...**. En **Usuarios y permisos** hay dos pestañas: Personas (ajustes por persona) y Permisos por perfil (tabla para cada perfil completo).
 
 ## Archivos
 
