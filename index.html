@@ -452,6 +452,21 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .mtx th.c span{font-size:12.5px}
 .mtx td{vertical-align:middle}
 .mtx tr.gr td{background:var(--fill);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);padding:8px 12px}
+.nuevos{box-shadow:var(--sh1),inset 0 0 0 2px #FFD9A8}
+.nuevos h2{display:flex;align-items:center;gap:8px}
+.nrow{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sep)}
+.nrow .umain{display:flex;flex-direction:column;min-width:0}
+.pill.nuevo{min-height:20px;padding:1px 8px;font-size:11px;vertical-align:2px}
+@media(max-width:900px){.nrow{grid-template-columns:38px minmax(0,1fr)}.nrow>.row{grid-column:1/-1}}
+.upgrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:10px;align-items:center}
+.drop{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px dashed var(--sep2);border-radius:12px;cursor:pointer;font-size:14px;color:var(--text2);min-height:46px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.drop:hover{border-color:var(--blue);color:var(--blue-d)}
+.drop.dis{opacity:.5;pointer-events:none}
+.frow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 20px;border-top:1px solid var(--sep)}
+.fnum{width:40px;height:40px;border-radius:10px;background:var(--fill);display:grid;place-items:center;font-weight:700;font-size:13px}
+.fnum.up{background:var(--blue-t);color:var(--blue-d)}
+.fmain{display:flex;flex-direction:column;gap:2px;min-width:0}
+@media(max-width:900px){.upgrid{grid-template-columns:1fr}.frow{grid-template-columns:40px minmax(0,1fr)}.frow>.row,.frow>.btn{grid-column:2}}
 .splash{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 .uav.ft{object-fit:cover;padding:0;background:#E8E8ED}
 .whochip{display:inline-flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--sep2);flex:none;max-width:240px}
@@ -459,7 +474,7 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .whochip span{display:flex;flex-direction:column;line-height:1.15;min-width:0;text-align:left}
 .whochip b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .whochip small{font-size:11px;color:var(--text2)}
-.toast{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:999px;background:rgba(29,29,31,.92);color:#fff;font-size:15px;font-weight:500;box-shadow:0 12px 36px rgba(0,0,0,.25);animation:fadeUp .35s var(--ease) both;max-width:calc(100% - 24px)}
+.toast{position:fixed;top:150px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:999px;background:rgba(29,29,31,.92);color:#fff;font-size:15px;font-weight:500;box-shadow:0 12px 36px rgba(0,0,0,.25);animation:fadeUp .35s var(--ease) both;max-width:calc(100% - 24px)}
 .uav.md{width:40px;height:40px;font-size:14px}
 .uav.sm{width:30px;height:30px;font-size:12px}
 .uav.xl{width:120px;height:120px;font-size:38px;background:var(--blue-t);color:var(--blue-d);box-shadow:0 0 0 4px #fff,0 6px 18px rgba(0,0,0,.12)}
@@ -741,7 +756,7 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
-SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["perfil","Mi perfil"]);
+SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["perfil","Mi perfil"]);SCREENS.push(["expediente","Expediente digital"]);
 const ROLN={admin:"Administrador",juez:"Juez",secretaria:"Secretaría",abogado:"Abogado",justiciable:"Justiciable",tercero:"Tercero"};
 const USON={funcionario:"Funcionario del tribunal",abogado:"Abogado",ciudadano:"Ciudadano"};
 const ON={gi:null,gdone:{},gtab:"pasos",atab:"personas",activo:false,tok:null,uid:null,perfil:null,perm:new Set(),vista:"login",err:"",msg:"",ocupado:false,form:{},
@@ -790,15 +805,15 @@ async function cargarOnline(){
  const perms=await rest("rpc/mis_permisos",{method:"POST",body:{}});
  const perm=new Set((perms||[]).map(x=>x.modulo));
  const r=await Promise.all([rest("causas?select=*&order=id"),perm.has("ver_identificacion")?rest("causas_identificacion?select=*"):Promise.resolve([]),
-  rest("folios?select=causa,numero,titulo,texto&order=causa,numero"),rest("resumen?select=*&order=causa,orden"),rest("calendario_sin_despacho?select=fecha")]);
- const cs=r[0]||[],ids=r[1]||[],fs=r[2]||[],rs=r[3]||[],cal=r[4]||[];
+  rest("folios?select=causa,numero,titulo,texto&order=causa,numero"),rest("resumen?select=*&order=causa,orden"),rest("calendario_sin_despacho?select=fecha"),rest("documentos?select=*&order=causa,folio").catch(()=>[])]);
+ const cs=r[0]||[],ids=r[1]||[],fs=r[2]||[],rs=r[3]||[],cal=r[4]||[],dcs=r[5]||[];
  const prev=S.causa;
  ON.uid=uid;ON.perfil=ps[0];ON.perm=perm;ON.activo=true;
  CAUSAS.length=0;
  cs.forEach(c=>{const id=ids.find(x=>x.causa===c.id),folios={};
   fs.filter(f=>f.causa===c.id).forEach(f=>{folios[f.numero]=[f.titulo,f.texto.split(FIC).join("")]});
   CAUSAS.push(Object.assign({},c.datos||{},{id:c.id,corta:c.corta,materia:c.materia,actora:c.actora,demandada:c.demandada,etapa:c.etapa,inicio:c.inicio,lapso:c.lapso,
-   actId:id?id.actora_id:null,demId:id?id.demandada_id:null,folios,
+   actId:id?id.actora_id:null,demId:id?id.demandada_id:null,folios,docs:dcs.filter(d=>d.causa===c.id),
    sum:rs.filter(x=>x.causa===c.id).map(x=>({id:x.id,f:x.folio,t:x.tecnico,c:x.claro,st:x.estado==="validado"?"ok":"pend",edited:x.corregido}))}))});
  S.off=new Set(cal.map(x=>x.fecha));
  S.sums={};CAUSAS.forEach(c=>{S.sums[c.id]=c.sum});
@@ -845,6 +860,7 @@ async function cargarAdmin(){if(ON.cargandoAdmin)return;ON.cargandoAdmin=true;
   if(!ON.usuarios.some(u=>u.id===ON.sel))ON.sel=(ON.usuarios.find(u=>u.id!==ON.uid)||ON.usuarios[0]||{}).id||null;ON.adminErr=""}
  catch(e){ON.adminErr=e.message}
  ON.cargandoAdmin=false;render()}
+const esNuevo=u=>u.rol==="tercero"&&!!u.uso&&u.activo;
 function efectivo(u,m){if(u.rol==="admin")return true;if(!u.activo)return false;const o=ON.overr[u.id];if(o&&o[m]!==undefined)return o[m];return !!(ON.plant[u.rol]&&ON.plant[u.rol].has(m))}
 const selU=()=>(ON.usuarios||[]).find(u=>u.id===ON.sel);
 const nomU=u=>u.nombre||usuarioDe(u.correo)||"usuario";
@@ -871,6 +887,8 @@ const I={
  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
  userx:'<circle cx="10" cy="8" r="4"/><path d="M2 21a8 8 0 0 1 12.5-6.6"/><path d="m17 16 5 5M22 16l-5 5"/>',
  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ files:'<path d="M15 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M15 2v5h5"/><path d="M4 7v13a2 2 0 0 0 2 2h10"/>',
+ upload:'<path d="M12 15V3M7 8l5-5 5 5"/><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/>',
  gavel:'<path d="m14.5 12.5-8 8a2.12 2.12 0 1 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/>',
  clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
  brief:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
@@ -901,9 +919,9 @@ const I={
 };
 const ic=(n,c)=>`<svg class="ic${c?" "+c:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 const emb=c=>`<span class="emb${c?" "+c:""}" aria-hidden="true">${ic("scale")}</span>`;
-const SICON={perfil:"user",usuarios:"users",causas:"folder",inicio:"home",estado:"scale",resumen:"file",lapsos:"cal",orientacion:"chat",tiempo:"timer",seguridad:"shield",bitacora:"list"};
+const SICON={expediente:"files",perfil:"user",usuarios:"users",causas:"folder",inicio:"home",estado:"scale",resumen:"file",lapsos:"cal",orientacion:"chat",tiempo:"timer",seguridad:"shield",bitacora:"list"};
 const RICON={admin:"shield",juez:"gavel",secretaria:"clip",abogado:"brief",justiciable:"user",tercero:"userx"};
-const GROUPS=[["Tribunal",["causas"]],["Causa",["inicio","estado","resumen","lapsos"]],["Asistente",["orientacion"]],["Pruebas en vivo",["tiempo","seguridad","bitacora"]],["Administración",["usuarios"]]];
+const GROUPS=[["Tribunal",["causas"]],["Causa",["inicio","estado","resumen","expediente","lapsos"]],["Asistente",["orientacion"]],["Pruebas en vivo",["tiempo","seguridad","bitacora"]],["Administración",["usuarios"]]];
 
 /* ========== Render ========== */
 const $=s=>document.querySelector(s);
@@ -949,7 +967,7 @@ function ring(p,size){const r=42,C=2*Math.PI*r;return `<svg viewBox="0 0 100 100
 
 function sidebar(){const r=ROLES[S.role],m=multi();
  return `<aside class="sb" aria-label="Navegación"><div class="brand">${emb("lg")}<div><b>Tamara</b><span>Asistente virtual tribunalicio</span></div></div>
-${GROUPS.filter(([g])=>(g!=="Tribunal"||m)&&(g!=="Administración"||S.role==="admin")).map(([g,ks])=>`<div class="ng"><span class="nl">${g==="Causa"&&m?"Causa · Exp. "+S.causa:g}</span>${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
+${GROUPS.filter(([g])=>(g!=="Tribunal"||m)&&(g!=="Administración"||S.role==="admin")).map(([g,ks])=>[g,ks.filter(k=>can(k)||!ON.activo)]).filter(([g,ks])=>ks.length).map(([g,ks])=>`<div class="ng"><span class="nl">${g==="Causa"&&m?"Causa · Exp. "+S.causa:g}</span>${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
 <div class="spacer"></div>
 ${ON.activo&&!ON.preview?`<button class="me mebtn" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"md")}<div><b>${esc(quien())}</b><span>Perfil: ${r.nombre} · Ver mi perfil</span></div></button>`:`<div class="me"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>`}
 <button class="btn sec sm block" data-act="logout">${ic("logout")}${ON.activo?"Cerrar sesión":"Cambiar perfil"}</button></aside>`}
@@ -963,7 +981,7 @@ ${ON.activo&&ON.perfil&&!ON.preview?`<button class="whochip hide-s" data-act="go
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo&&!esAdmin()?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
 ${ON.activo&&!ON.preview?`<button class="show-s mavbtn" data-act="go" data-v="perfil" aria-label="Mi perfil">${avatar(ON.perfil,"sm")}</button>`:""}<button class="iconbtn show-s" data-act="logout" aria-label="${ON.activo?"Cerrar sesión":"Cambiar perfil"}" title="${ON.activo?"Cerrar sesión":"Cambiar perfil"}">${ic("logout")}</button></div>
-<nav class="mnav" aria-label="Secciones">${SCREENS.filter(([k])=>k!=="perfil"&&(k!=="causas"||m)&&(k!=="usuarios"||S.role==="admin")).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
+<nav class="mnav" aria-label="Secciones">${SCREENS.filter(([k])=>k!=="perfil"&&(k!=="causas"||m)&&(k!=="usuarios"||S.role==="admin")&&(can(k)||!ON.activo)).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
 function viewLogin(fresh){return S.demo?viewLoginDemo(fresh):viewAcceso(fresh)}
 function viewLoginDemo(fresh){const L=computeLapso(S.off);
  return band()+`<div class="auth${fresh?" anim":""}"><section class="hero"><div class="hero-txt">
@@ -988,8 +1006,8 @@ ${S.codeErr?`<p class="err">${ic("alert")}Código incorrecto. El intento quedó 
 
 function denied(what){return `<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Acceso denegado</h2><p class="t2">${esc(what)}</p><p class="small t3">El intento quedó registrado en la bitácora.</p></div>`}
 function screen(s){if(ON.activo&&ON.perfil&&!ON.perfil.activo)return suspendida();if(!can(s))return denied("Su perfil ("+ROLES[S.role].nombre+") no tiene permiso para ver esta sección. Esta causa solo está disponible para el tribunal, las partes y sus apoderados.");
- if(["inicio","estado","resumen","lapsos"].includes(s)&&!(s==="inicio"&&S.role==="tercero")&&!causaAct())return sinCausas();
- return({perfil:vPerfil,causas:vCausas,usuarios:vUsuarios,inicio:vInicio,estado:vEstado,resumen:vResumen,lapsos:vLapsos,orientacion:vOrient,tiempo:vTiempo,seguridad:vSeg,bitacora:vBit})[s]()}
+ if(["inicio","estado","resumen","lapsos","expediente"].includes(s)&&!(s==="inicio"&&S.role==="tercero")&&!causaAct())return sinCausas();
+ return({expediente:vExpediente,perfil:vPerfil,causas:vCausas,usuarios:vUsuarios,inicio:vInicio,estado:vEstado,resumen:vResumen,lapsos:vLapsos,orientacion:vOrient,tiempo:vTiempo,seguridad:vSeg,bitacora:vBit})[s]()}
 const langToggle=()=>S.role==="abogado"||S.role==="juez"||S.role==="secretaria"?`<div class="seg" role="group" aria-label="Tipo de lectura"><button class="${S.simple?"":"on"}"${S.simple?' data-act="simple"':""} aria-pressed="${!S.simple}">Lectura técnica</button><button class="${S.simple?"on":""}"${S.simple?"":' data-act="simple"'} aria-pressed="${S.simple}">Lenguaje claro</button></div>`:"";
 
 function vCausas(){
@@ -1010,7 +1028,7 @@ ${ic("chev","cchev")}</button>`).join("")}</div>
 }
 function vInicio(){
  const c=causaAct(),L=lapsoDe(c),m=multi();
- if(S.role==="tercero")return head("Bienvenido"+(ON.activo&&ON.perfil.nombre?", "+esc(ON.perfil.nombre.split(" ")[0]):""))+(ON.activo?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small">Su cuenta está activa con acceso de orientación general. El administrador le asignará su perfil y sus causas; cuando lo haga, lo verá al cambiar de pantalla.</p></div>`:"")+`<div class="card stack" style="gap:18px"><div class="row" style="gap:16px;align-items:flex-start;flex-wrap:nowrap">${emb("md")}<p class="big">Como persona ajena a la causa, puede usar la orientación general sobre cómo funciona un proceso. No puede ver expedientes.</p></div><div class="row"><button class="btn" data-act="go" data-v="orientacion">${ic("chat")}Ir a orientación</button><button class="btn sec" data-act="go" data-v="estado">${ic("lock")}Intentar abrir el expediente</button></div></div>`;
+ if(S.role==="tercero")return head("Bienvenido"+(ON.activo&&ON.perfil.nombre?", "+esc(ON.perfil.nombre.split(" ")[0]):""))+(ON.activo?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small">Su cuenta está activa con acceso de orientación general. El administrador le asignará su perfil y sus causas; cuando lo haga, lo verá al cambiar de pantalla.</p></div>`:"")+`<div class="card stack" style="gap:18px"><div class="row" style="gap:16px;align-items:flex-start;flex-wrap:nowrap">${emb("md")}<p class="big">Como persona ajena a la causa, puede usar la orientación general sobre cómo funciona un proceso. No puede ver expedientes.</p></div><div class="row"><button class="btn" data-act="go" data-v="orientacion">${ic("chat")}Ir a orientación</button>${!ON.activo||ON.preview?`<button class="btn sec" data-act="go" data-v="estado">${ic("lock")}Intentar abrir el expediente</button>`:""}</div></div>`;
  const tec=!clear();
  const t1=L?`<div class="ringrow"><div class="ringbox" role="img" aria-label="${L.transcurridos} de ${c.lapso} días">${ring(L.transcurridos/c.lapso)}<div class="ringc"><b class="num">${L.restantes}</b><span>de ${c.lapso}</span></div></div>
  <p>${tec?"días de despacho restantes para "+c.verbT:"días de despacho quedan para "+c.verbC}</p></div>`
@@ -1129,11 +1147,11 @@ function vUsuarios(){
  if(!ON.usuarios){if(!ON.cargandoAdmin)setTimeout(cargarAdmin,0);return head("Usuarios y permisos","Cargando las personas registradas...")}
  const U=ON.usuarios,u=selU()||U[0],tabP=ON.atab==="perfiles";
  const tabs=`<div class="seg atabs" role="tablist"><button role="tab" class="${tabP?"":"on"}"${tabP?' data-act="atab" data-v="personas"':""}>${ic("users")}Personas</button><button role="tab" class="${tabP?"on":""}"${tabP?"":' data-act="atab" data-v="perfiles"'}>${ic("shield")}Permisos por perfil</button></div>`;
- const pend=U.filter(x=>x.rol==="tercero"&&x.uso&&x.uso!=="ciudadano").length;
- const lista=U.map(x=>`<button class="urow${u&&x.id===u.id?" cur":""}" data-act="usel" data-v="${x.id}" data-s="${esc(norm(nomU(x)+" "+(x.correo||"")))}">${avatar(x)}<span class="umain"><b>${esc(nomU(x))}${x.id===ON.uid?' <span class="t3">(usted)</span>':""}</b><span class="xs t2">Usuario: ${esc(usuarioDe(x.correo))}</span></span><span class="ubad"><span class="pill${x.rol==="admin"?" info":""}">${ROLN[x.rol]}</span>${x.activo?"":`<span class="pill bad">Suspendida</span>`}</span></button>`).join("");
+ const nuevos=U.filter(esNuevo),pend=0;
+ const lista=U.map(x=>`<button class="urow${u&&x.id===u.id?" cur":""}" data-act="usel" data-v="${x.id}" data-s="${esc(norm(nomU(x)+" "+(x.correo||"")))}">${avatar(x)}<span class="umain"><b>${esc(nomU(x))}${x.id===ON.uid?' <span class="t3">(usted)</span>':""}${esNuevo(x)?' <span class="pill warn nuevo">Nuevo</span>':""}</b><span class="xs t2">Usuario: ${esc(usuarioDe(x.correo))}</span></span><span class="ubad"><span class="pill${x.rol==="admin"?" info":""}">${ROLN[x.rol]}</span>${x.activo?"":`<span class="pill bad">Suspendida</span>`}</span></button>`).join("");
  return head("Usuarios y permisos",`Base de datos de las personas registradas: ${U.length} en total. Asigne a cada una su perfil y lo que puede ver y hacer.`,`<button class="btn sec sm" data-act="ucsv">${ic("doc")}Descargar lista</button><button class="btn sec sm" data-act="uref">${ic("refresh")}Actualizar</button>`)+
  (pend?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small"><b>${pend}</b> ${pend===1?"persona registrada como funcionario o abogado espera":"personas registradas como funcionario o abogado esperan"} que le asigne su perfil.</p></div>`:"")+
- `<div style="margin-bottom:16px">${tabs}</div><div class="card stack" style="margin-bottom:16px;gap:12px"><div><h3>Ver la app como...</h3><p class="small t2" style="margin-top:2px">Muestra exactamente lo que ve cada perfil con sus permisos actuales. Abogado y Justiciable se muestran con la causa DEMO-0001.</p></div><div class="row">${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<button class="btn sec sm" data-act="ver" data-v="${r}">${ic(RICON[r])}${ROLN[r]}</button>`).join("")}</div></div>
+ `<div style="margin-bottom:16px">${tabs}</div>${nuevos.length&&!tabP?`<div class="card stack nuevos" style="margin-bottom:16px;gap:12px"><div class="row between"><h2>${ic("users")}Nuevos registros</h2><span class="pill warn">${nuevos.length} ${nuevos.length===1?"persona espera":"personas esperan"} su perfil</span></div><p class="small t2">Se registraron en la página y por ahora solo tienen orientación general. Asígneles su perfil: después puede ajustar sus permisos y causas.</p>${nuevos.map(x=>`<div class="nrow">${avatar(x)}<span class="umain"><b>${esc(nomU(x))}</b><span class="xs t2">Usuario: ${esc(usuarioDe(x.correo))} · se registró como ${x.uso?USON[x.uso].toLowerCase():"sin dato"} · ${new Date(x.creado).toLocaleString("es-VE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span></span><span class="row" style="gap:6px">${["juez","secretaria","abogado","justiciable"].map(r=>`<button class="btn sec sm" data-act="asignar" data-v="${x.id}|${r}"${ON.ocupado?" disabled":""}>${ic(RICON[r])}${ROLN[r]}</button>`).join("")}<button class="btn ghost sm" data-act="usel" data-v="${x.id}">Ver detalle${ic("chev")}</button></span></div>`).join("")}</div>`:""}<div class="card stack" style="margin-bottom:16px;gap:12px"><div><h3>Ver la app como...</h3><p class="small t2" style="margin-top:2px">Muestra exactamente lo que ve cada perfil con sus permisos actuales. Abogado y Justiciable se muestran con la causa DEMO-0001.</p></div><div class="row">${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<button class="btn sec sm" data-act="ver" data-v="${r}">${ic(RICON[r])}${ROLN[r]}</button>`).join("")}</div></div>
  ${tabP?matrizPerfiles():`<div class="adm"><div class="card ulist"><label class="search" style="margin:14px 14px 8px;width:auto">${ic("search")}<input id="fusu" type="text" placeholder="Buscar por nombre o usuario" value="${esc(ON.uq||"")}" autocomplete="off" aria-label="Buscar usuario"></label><div class="urows">${lista}</div></div>
  <div class="card udet">${u?detalleUsuario(u):`<p class="t2">Todavía no hay personas registradas.</p>`}</div></div>`}`;
 }
@@ -1176,7 +1194,25 @@ function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para 
 <p class="t2">Usuario: <b>${esc(usuarioDe(p.correo))}</b> · Perfil: <b>${ROLN[p.rol]}</b>${p.uso?" · Se registró como "+USON[p.uso].toLowerCase():""}</p>
 <div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}</div>
 <p class="xs t3">En el teléfono puede tomarla con la cámara. La foto se recorta en cuadrado y se guarda en pequeño.</p></div></div>
-<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>`}
+<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>`}
+function vExpediente(){if(!ON.activo)return denied("El expediente digital necesita la base de datos conectada.");
+ const c=causaAct(),docs=c.docs||[],dis=ON.subiendo?" disabled":"",sub=puede("subir_documentos"),sig=siguienteFolio(c);
+ const textos=Object.keys(c.folios||{}).map(n=>({n:+n,t:c.folios[n][0]}));
+ const filas=textos.concat(docs.map(d=>({n:d.folio,doc:d}))).sort((a,b)=>a.n-b.n);
+ return head("Expediente digital","Exp. "+c.id+" · "+filas.length+" folios. Los documentos se guardan en la nube y no se pueden modificar.")+
+ (sub?`<div class="card stack"><div class="row between"><h2>Subir documento</h2><span class="pill info">${ic("hash")}Quedará como folio ${sig}</span></div>
+<div class="upgrid"><input type="text" id="dTitulo" placeholder="Título (por ejemplo: Escrito de promoción de pruebas)" maxlength="200" value="${esc(ON.docTitulo||"")}"${dis}>
+<label class="drop${ON.subiendo?" dis":""}" for="dArchivo"><span class="itile sm">${ic("upload")}</span><span id="dNombre">${ON.archivoNombre?esc(ON.archivoNombre):"Elegir PDF, JPG o PNG (máx. 10 MB)"}</span></label><input type="file" id="dArchivo" accept="application/pdf,image/jpeg,image/png" hidden>
+<button class="btn" data-act="subirdoc"${dis}>${ic("upload")}${ON.subiendo?"Subiendo...":"Subir al expediente"}</button></div>
+<p class="xs t3">Antes de subirlo se calcula su huella SHA-256. Queda registrado quién lo subió y cuándo, y se anota en la bitácora. En el teléfono puede fotografiar el documento.</p></div>`:"")+
+ `<div class="card clist" style="margin-top:16px"><div class="chead"><h2>Folios del expediente</h2>${sub?"":`<span class="pill">${ic("lock")}Solo quien tiene permiso puede subir documentos</span>`}</div>
+${filas.length?filas.map(f=>f.doc?filaDoc(f.doc):`<div class="frow"><span class="fnum num">${f.n}</span><span class="fmain"><b>${esc(f.t)}</b><span class="xs t2">Texto del expediente</span></span><button class="btn sec sm" data-act="folio" data-v="${f.n}">${ic("eye")}Ver</button></div>`).join(""):`<p class="t2" style="padding:16px 20px">Todavía no hay folios.</p>`}</div>`}
+function filaDoc(d){const tipo=/pdf/.test(d.tipo)?"PDF":"Imagen";
+ return `<div class="frow"><span class="fnum num up">${d.folio}</span><span class="fmain"><b>${esc(d.titulo)}</b><span class="xs t2">${tipo} · ${tamTxt(d.tamano)} · subido por ${esc(d.subido_nombre||"sin dato")} el ${new Date(d.subido_en).toLocaleString("es-VE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><span class="xs t3">Huella ${d.huella.slice(0,16)}...</span></span><span class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sec sm" data-act="abrirdoc" data-v="${d.id}">${ic("eye")}Abrir</button><button class="btn sec sm" data-act="verifdoc" data-v="${d.id}">${ic("checkc")}Verificar</button></span></div>`}
+const tamTxt=b=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+function siguienteFolio(c){const ns=Object.keys(c.folios||{}).map(Number).concat((c.docs||[]).map(d=>d.folio));return (ns.length?Math.max.apply(null,ns):0)+1}
+const buscarDoc=id=>{for(const c of CAUSAS)for(const d of (c.docs||[]))if(String(d.id)===String(id))return d;return null};
+function modalHuella(d,h,ok){return()=>`<div class="overlay" data-act="close"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Verificación de huella"><div class="mhd"><span class="itile sm">${ic("hash")}</span><h2>Folio ${d.folio}: ${esc(d.titulo)}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div><div class="banner ${ok?"ok":"bad"}">${ic(ok?"checkc":"xc")}<div><b class="t">${ok?"Documento íntegro":"Documento alterado"}</b><p class="small">${ok?"La huella del archivo guardado en la nube coincide con la registrada al subirlo.":"La huella no coincide con la registrada: el archivo cambió."}</p></div></div><p class="small t2">Huella registrada al subirlo:</p><p class="hash">${d.huella}</p><p class="small t2">Huella calculada ahora:</p><p class="hash">${h}</p><div><button class="btn" data-act="close">Cerrar</button></div></div></div>`}
 const sinCausas=()=>`<div class="card denied"><span class="itile lg gray">${ic("folder")}</span><h2>Sin causas vinculadas</h2><p class="t2">Su cuenta todavía no tiene causas asignadas. El administrador debe vincularle las causas en las que participa.</p></div>`;
 const suspendida=()=>`<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Cuenta suspendida</h2><p class="t2">El administrador suspendió esta cuenta. Comuníquese con el tribunal para reactivarla.</p></div>`;
 
@@ -1211,6 +1247,7 @@ const GUIA_ON=[
  {g:"Juez",t:"Todas las causas del tribunal",d:"El juez ve las causas activas con sus lapsos y vencimientos, y entra a cualquiera sin repetir nada.",run:()=>verComo("juez","causas")},
  {g:"Juez",t:"Datos de las partes protegidos",d:"La identificación de las partes aparece oculta. Mostrarla queda registrado en la bitácora.",run:()=>verComo("juez","estado")},
  {g:"Secretaría",t:"Validación humana del resumen",d:"Cada afirmación remite a su folio. Apruebe la que está pendiente: queda guardada en la base de datos.",run:()=>verComo("secretaria","resumen")},
+ {g:"Secretaría",t:"Expediente digital",d:"Suba un documento PDF o una foto: queda en la nube como folio nuevo, con su huella SHA-256 y anotado en la bitácora. Luego pulse Verificar.",run:()=>verComo("secretaria","expediente")},
  {g:"Secretaría",t:"Control de lapsos",d:"Toque un día del calendario para marcarlo sin despacho: el vencimiento de todas las causas se recalcula.",run:()=>verComo("secretaria","lapsos")},
  {g:"Abogado y justiciable",t:"Lectura técnica del abogado",d:"El abogado ve su causa con lenguaje jurídico y la cita del CPC.",run:()=>verComo("abogado","estado")},
  {g:"Abogado y justiciable",t:"Lenguaje claro para el justiciable",d:"La misma actuación explicada sin tecnicismos para la parte sin formación jurídica.",run:()=>verComo("justiciable","estado")},
@@ -1223,7 +1260,7 @@ const GUIA_ON=[
 const esAdmin=()=>ON.activo&&ON.perfil&&ON.perfil.rol==="admin";
 async function irAdmin(tab){salirPreview();ON.atab=tab;go("usuarios");if(!ON.usuarios)await cargarAdmin()}
 async function verComo(rol,sc,q){if(!ON.usuarios||!ON.mods)await cargarAdmin();salirPreview();A.ver(rol);
- if(["estado","resumen","lapsos"].includes(sc)&&CAUSAS.some(c=>c.id==="DEMO-0001")&&S.causa!=="DEMO-0001")abrirCausa("DEMO-0001");
+ if(["estado","resumen","lapsos","expediente"].includes(sc)&&CAUSAS.some(c=>c.id==="DEMO-0001")&&S.causa!=="DEMO-0001")abrirCausa("DEMO-0001");
  go(sc);if(q){S.chat=[];ask(q)}}
 function irPantalla(sc){salirPreview();go(sc);if(sc==="bitacora"){ON.bit=null;cargarBitacora()}}
 function viewGuideOnline(){const adm=esAdmin(),pasos=adm&&ON.gtab!=="como",gi=ON.gi;let last="";
@@ -1349,11 +1386,49 @@ A.ver=v=>{if(!ON.activo||!ON.perfil||ON.perfil.rol!=="admin")return"keep";
  else entrarPreview({rol:v,nombre:"el perfil "+ROLN[v],perm:new Set(ON.plant[v]||[]),causas:new Set(["DEMO-0001"])})};
 A.salirver=()=>{salirPreview()};
 A.atab=v=>{ON.atab=v};
+A.asignar=v=>{const k=v.split("|"),u=(ON.usuarios||[]).find(x=>x.id===k[0]),r=k[1];if(!u||!ROLN[r])return"keep";ON.sel=u.id;
+ tarea(async()=>{await rest("usuario_permisos?usuario=eq."+u.id,{method:"DELETE",prefer:"return=minimal"});await rest("perfiles?id=eq."+u.id,{method:"PATCH",body:{rol:r},prefer:"return=minimal"})},"Administración: perfil de "+nomU(u)+" asignado: "+ROLN[r]);return"keep"};
+/* El panel se actualiza solo si alguien se registra o cambia */
+setInterval(async()=>{if(!esAdmin()||S.screen!=="usuarios"||ON.preview||ON.ocupado||ON.editNom||S.modal||ON.cargandoAdmin||document.visibilityState!=="visible"||!ON.usuarios)return;
+ try{const ps=await rest("perfiles?select=id,rol,activo,nombre,foto&order=creado");const firma=x=>(x||[]).map(u=>u.id+u.rol+u.activo+u.nombre+(u.foto?u.foto.length:0)).join("|");
+  if(firma(ps)!==firma(ON.usuarios))cargarAdmin()}catch(e){}},15000);
 A.minom=v=>{ON.editMine=!!v;if(v)setTimeout(()=>{const i=$("#miNombre");if(i){i.focus();i.select()}},0)};
 A.minomsave=()=>{const n=(($("#miNombre")||{}).value||"").trim().replace(/\s+/g," ");if(n.length<2){S.modal=modalMsg("No se pudo guardar","Escriba un nombre de al menos 2 letras.");return}
  ON.editMine=false;if(n===ON.perfil.nombre)return;ON.ocupado=true;
  rest("perfiles?id=eq."+ON.uid,{method:"PATCH",body:{nombre:n},prefer:"return=minimal"}).then(()=>{ON.perfil.nombre=n;logEv("Perfil: nombre actualizado")},e=>{S.modal=modalMsg("No se pudo guardar",e.message)}).then(()=>{ON.ocupado=false;ON.usuarios=null;render()})};
 A.quitarfoto=()=>{guardarFoto(null);return"keep"};
+async function sha256Hex(buf){if(!(window.crypto&&crypto.subtle))throw new Error("Este navegador no puede calcular la huella. Use Chrome, Edge o Safari actualizados.");const h=await crypto.subtle.digest("SHA-256",buf);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,"0")).join("")}
+const rutaNube=path=>path.split("/").map(encodeURIComponent).join("/");
+async function subirArchivo(path,f,re){const r=await fetch(SB_URL+"/storage/v1/object/expedientes/"+rutaNube(path),{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+ON.tok.access_token,"Content-Type":f.type,"x-upsert":"false","cache-control":"3600"},body:f});
+ if(r.ok)return;const txt=await r.text();if((r.status===401||/jwt|token/i.test(txt))&&!re&&await refrescar())return subirArchivo(path,f,true);
+ let m=txt;try{const d=JSON.parse(txt);m=d.message||d.error||txt}catch(e){}
+ throw new Error(/row-level|security|unauthorized/i.test(m)||r.status===403?"Su perfil no tiene permiso para subir documentos a esta causa.":"La nube respondió: "+m)}
+async function urlFirmada(path){const r=await sbFetch("/storage/v1/object/sign/expedientes/"+rutaNube(path),{method:"POST",body:{expiresIn:300}});const u=r.signedURL||r.signedUrl;return SB_URL+"/storage/v1"+(u.charAt(0)==="/"?u:"/"+u)}
+async function subirDocumento(){const c=causaAct(),t=(ON.docTitulo||"").trim(),f=ON.archivo;if(!c)return;
+ const aviso=(a,b)=>{S.modal=modalMsg(a,b);render()};
+ if(t.length<3)return aviso("Falta el título","Escriba un título de al menos 3 letras.");
+ if(!f)return aviso("Falta el archivo","Elija el documento en PDF, JPG o PNG.");
+ if(!/^(application\/pdf|image\/jpeg|image\/png)$/.test(f.type))return aviso("Formato no permitido","Solo se aceptan documentos PDF, JPG o PNG.");
+ if(f.size>10485760)return aviso("Archivo muy grande","El máximo es 10 MB.");
+ ON.subiendo=true;render();
+ try{const huella=await sha256Hex(await f.arrayBuffer()),folio=siguienteFolio(c);
+  const limpio=f.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9._-]+/g,"_").slice(-80);
+  const path=c.id+"/"+String(folio).padStart(4,"0")+"-"+Date.now()+"-"+limpio;
+  await subirArchivo(path,f);
+  await rest("documentos",{method:"POST",body:{causa:c.id,folio:folio,titulo:t,archivo:path,tipo:f.type,tamano:f.size,huella:huella,subido_por:ON.uid},prefer:"return=minimal"});
+  c.docs=await rest("documentos?causa=eq."+c.id+"&select=*&order=folio")||[];
+  ON.archivo=null;ON.archivoNombre="";ON.docTitulo="";
+  S.modal=modalMsg("Documento subido","Quedó guardado en la nube como folio "+folio+" del Exp. "+c.id+", con su huella SHA-256, y se anotó en la bitácora.")}
+ catch(e){S.modal=modalMsg("No se pudo subir el documento",e.message)}
+ ON.subiendo=false;render()}
+A.subirdoc=()=>{subirDocumento();return"keep"};
+A.abrirdoc=v=>{const d=buscarDoc(v);if(!d)return"keep";const w=window.open("about:blank","_blank");
+ urlFirmada(d.archivo).then(u=>{if(w)w.location.href=u;else location.href=u;logEv("Documento consultado: folio "+d.folio)},e=>{if(w)w.close();S.modal=modalMsg("No se pudo abrir el documento",e.message);render()});return"keep"};
+A.verifdoc=v=>{const d=buscarDoc(v);if(!d)return"keep";S.modal=modalMsg("Verificando la huella","Descargando el documento de la nube y calculando su huella SHA-256...");render();
+ urlFirmada(d.archivo).then(u=>fetch(u)).then(r=>{if(!r.ok)throw new Error("No se pudo descargar el documento ("+r.status+").");return r.arrayBuffer()}).then(sha256Hex)
+  .then(h=>{const ok=h===d.huella;S.modal=modalHuella(d,h,ok);logEv((ok?"Integridad verificada":"Alteración detectada")+": folio "+d.folio)},e=>{S.modal=modalMsg("No se pudo verificar",e.message)}).then(render);return"keep"};
+document.addEventListener("change",e=>{if(e.target.id!=="dArchivo")return;const f=e.target.files&&e.target.files[0];ON.archivo=f||null;ON.archivoNombre=f?f.name+" · "+tamTxt(f.size):"";const n=$("#dNombre");if(n)n.textContent=ON.archivoNombre||"Elegir PDF, JPG o PNG (máx. 10 MB)"});
+document.addEventListener("input",e=>{if(e.target.id==="dTitulo")ON.docTitulo=e.target.value});
 function saludar(){ON.toast="Hola, "+quien()+". Entró como "+ROLN[ON.perfil.rol]+".";clearTimeout(ON.toastT);ON.toastT=setTimeout(()=>{ON.toast="";const t=$(".toast");if(t)t.remove()},5000)}
 function guardarFoto(f){ON.ocupado=true;render();
  rest("perfiles?id=eq."+ON.uid,{method:"PATCH",body:{foto:f},prefer:"return=minimal"}).then(()=>{ON.perfil.foto=f;logEv(f?"Perfil: foto actualizada":"Perfil: foto quitada")},e=>{S.modal=modalMsg("No se pudo guardar la foto",e.message)}).then(()=>{ON.ocupado=false;ON.usuarios=null;render()})}
