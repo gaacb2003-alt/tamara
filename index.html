@@ -607,7 +607,7 @@ a.btn{text-decoration:none}
 .fbtns{gap:8px;flex-wrap:nowrap;flex:none}
 .nversion{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:999px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.18);border:1px solid var(--sep);font-size:14px;font-weight:600;max-width:calc(100vw - 24px)}
 .nversion .ic{width:18px;height:18px;color:var(--blue);flex:none}
-.fnum input{max-width:160px}
+.fnumcampo input{max-width:180px}
 .anexos{border-top:1px solid var(--sep);padding-top:14px;display:flex;flex-direction:column;gap:10px}
 .anexos h3{display:flex;align-items:center;gap:8px;font-size:16px}
 .anexos h3 .ic{width:18px;height:18px;color:var(--blue)}
@@ -966,7 +966,8 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 /* ========== Conexión con la base de datos (Supabase) ========== */
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 /* Dos páginas salen de este mismo archivo: "tribunal" (todas las personas) y "admin" (solo administración) */
-const VERSION="20261108-230737",MODO="tribunal",URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+const VERSION="20261108-231727",MODO="tribunal",LOCAL=false,URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
 SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["pagina","Página del tribunal"]);SCREENS.push(["perfil","Mi perfil"]);SCREENS.push(["expediente","Expediente digital"]);
@@ -1365,8 +1366,7 @@ ${MODO==="tribunal"?`<div class="sep"><span>o</span></div><button type="button" 
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Creando la cuenta...":"Crear cuenta"}</button>
 <button type="button" class="btn ghost" data-act="vlog"${dis}>¿Ya tiene cuenta? Iniciar sesión</button></form>`;
  if(MODO==="tribunal")return viewPortada(fresh,entrarCompacto(f,dis,err,msg),false);
- if(MODO==="local")return viewPortada(fresh,eleccionLocal(),true);
- return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="fb"><div class="fb-photo fondo" role="img" aria-label="Imágenes del tribunal">${slidesHTML([IMG.foto].concat(FONDOS_ADM))}<div class="fb-ov"><span class="eyebrow">Administración</span><h1 class="display">Tamara</h1><p class="lead">Perfiles, permisos y la página del tribunal se manejan desde aquí.</p></div></div>
+ return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="fb"><div class="fb-photo fondo" role="img" aria-label="Imágenes del tribunal">${slidesHTML([IMG.foto].concat(LOCAL?FONDOS_LOCAL:FONDOS_ADM))}<div class="fb-ov"><span class="eyebrow">Administración</span><h1 class="display">Tamara</h1><p class="lead">Perfiles, permisos y la página del tribunal se manejan desde aquí.</p></div></div>
 <div class="fb-r"><div class="card fbcard">${entrar}</div>${ACCESO_RAPIDO?`<div class="card rapido"><div class="row between"><h3>Acceso rápido</h3><span class="pill">Demostración</span></div><button class="btn block lg" data-act="rapido" data-v="admin"${dis}>${ic("shield")}Entrar como Administrador</button></div>`:""}<p class="small t2 fbnota">${ic("lock")}<span>Página de administración. Las demás personas entran por la página del tribunal.</span></p></div></section></div>`+foot()+`</div>`}
 function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para ver su perfil.");const p=ON.perfil,dis=ON.ocupado?" disabled":"";
  return head("Mi perfil","Sus datos en Tamara. Los ven usted y la administración.")+`<div class="card perfilc">${avatar(p,"xl")}
@@ -1570,7 +1570,7 @@ async function subirArchivo(path,f,re){const r=await fetch(SB_URL+"/storage/v1/o
  if(r.ok)return;const txt=await r.text();if((r.status===401||/jwt|token/i.test(txt))&&!re&&await refrescar())return subirArchivo(path,f,true);
  let m=txt;try{const d=JSON.parse(txt);m=d.message||d.error||txt}catch(e){}
  throw new Error(/row-level|security|unauthorized/i.test(m)||r.status===403?"Su perfil no tiene permiso para subir documentos a esta causa.":"La nube respondió: "+m)}
-async function urlFirmada(path){const r=await sbFetch("/storage/v1/object/sign/expedientes/"+rutaNube(path),{method:"POST",body:{expiresIn:300}});const u=r.signedURL||r.signedUrl;return SB_URL+"/storage/v1"+(u.charAt(0)==="/"?u:"/"+u)}
+async function urlFirmada(path){if(LOCAL){const b=LBLOB.get("expedientes/"+path);if(!b)throw new Error("Ese archivo se subió en otra sesión y no está guardado en este equipo.");return URL.createObjectURL(b)}const r=await sbFetch("/storage/v1/object/sign/expedientes/"+rutaNube(path),{method:"POST",body:{expiresIn:300}});const u=r.signedURL||r.signedUrl;return SB_URL+"/storage/v1"+(u.charAt(0)==="/"?u:"/"+u)}
 async function subirDocumento(){const c=causaAct(),t=(ON.docTitulo||"").trim(),f=ON.archivo;if(!c)return;
  const aviso=(a,b)=>{S.modal=modalMsg(a,b);render()};
  if(t.length<3)return aviso("Falta el título","Escriba un título de al menos 3 letras.");
@@ -1656,7 +1656,7 @@ const puedeEditarFolio=()=>!!ON.activo&&puede("editar_folios");
 function modalFolioEd(){return()=>{const d=ON.fDraft||{},dis=ON.ocupado?" disabled":"";
  return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Modificar folio" style="max-width:680px"><div class="mhd"><span class="itile sm">${ic("doc")}</span><h2>Modificar folio ${d.n}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>
 <p class="t2 small">Exp. ${esc(d.causa)}. Al guardar se recalcula la huella SHA-256 y la bitácora guarda la huella anterior y la nueva, con su nombre. Si cambia el número, los resúmenes que citaban este folio pasan al número nuevo.</p>
-<label class="pfld fnum"><span>Número de folio</span><input type="number" id="feNum" min="1" max="99999" inputmode="numeric" value="${esc(String(d.num))}"></label>
+<label class="pfld fnumcampo"><span>Número de folio</span><input type="number" id="feNum" min="1" max="99999" inputmode="numeric" value="${esc(String(d.num))}"></label>
 <label class="pfld"><span>Título</span><input type="text" id="feTit" maxlength="200" value="${esc(d.titulo||"")}"></label>
 <label class="pfld"><span>Texto del folio</span><textarea id="feTxt" rows="10" maxlength="20000">${esc(d.texto||"")}</textarea></label>
 ${ON.fErr?`<p class="err">${ic("alert")}${esc(ON.fErr)}</p>`:""}
@@ -1676,7 +1676,7 @@ A.efoliook=()=>{const d=ON.fDraft;if(!d)return"keep";const ti=String(d.titulo||"
 
 /* ========== Versión nueva publicada: se actualiza sola o avisa con un botón ========== */
 let versionNueva="";
-async function revisarVersion(){if(location.protocol==="file:"||document.hidden)return;
+async function revisarVersion(){if(LOCAL||location.protocol==="file:"||document.hidden)return;
  try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const d=await r.json();
   if(d&&d.v&&d.v!==VERSION){versionNueva=d.v;mostrarVersion()}}catch(e){}}
 function recargarNueva(){location.replace(location.pathname+"?v="+encodeURIComponent(versionNueva||String(Date.now())))}
@@ -1747,13 +1747,13 @@ const PAG_DEF={eyebrow:"Asistente virtual tribunalicio",titulo:"Hola, soy Tamara
 const FONDO_URL=n=>SB_URL+"/storage/v1/object/public/pagina/fondos/"+n+".jpg";
 const FONDOS_DEF=[1,2,3,4,5].map(i=>FONDO_URL("pub_"+i)),FONDOS_ADM=[1,2,3,4].map(i=>FONDO_URL("adm_"+i));
 const FONDOS_LOCAL=["","",""].filter(Boolean);
-const fondosPag=p=>{if(MODO==="local"&&FONDOS_LOCAL.length)return FONDOS_LOCAL;const l=Array.isArray(p.fotos)?p.fotos.filter(okFoto).slice(0,8):[];return l.length?l:FONDOS_DEF};
+const fondosPag=p=>{if(LOCAL&&FONDOS_LOCAL.length&&!(Array.isArray(p.fotos)&&p.fotos.filter(okFoto).length))return FONDOS_LOCAL;const l=Array.isArray(p.fotos)?p.fotos.filter(okFoto).slice(0,8):[];return l.length?l:FONDOS_DEF};
 let slideI=0;
 function slidesHTML(f){const i=slideI%f.length;return f.map((u,k)=>`<div class="slide${k===i?" on":""}" style="background-image:url('${u}')"></div>`).join("")+(f.length>1?`<div class="dots" aria-hidden="true">${f.map((u,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>`:"")}
 setInterval(()=>{if(document.hidden)return;const vs=document.querySelectorAll(".fondo");if(!vs.length)return;slideI++;
  vs.forEach(el=>{const sl=el.querySelectorAll(".slide"),d=el.querySelectorAll(".dots i");if(sl.length<2)return;const i=slideI%sl.length;sl.forEach((x,k)=>x.classList.toggle("on",k===i));d.forEach((x,k)=>x.classList.toggle("on",k===i))})},6000);
 const PAG=()=>{const p=Object.assign({},PAG_DEF),d=ON.pag||{};Object.keys(PAG_DEF).forEach(k=>{if(d[k]!==undefined&&d[k]!==null)p[k]=d[k]});return p};
-const okFoto=u=>typeof u==="string"&&u.indexOf(SB_URL+"/storage/v1/object/public/pagina/")===0&&!/['"()\\\s]/.test(u);
+const okFoto=u=>typeof u==="string"&&(u.indexOf(SB_URL+"/storage/v1/object/public/pagina/")===0||(LOCAL&&u.indexOf("data:image/")===0))&&!/['"()\\\s]/.test(u);
 function heroTexto(p,o){o=o||{};const H=o.h||"h1";return `<div class="hero-txt">${p.eyebrow?`<span class="eyebrow">${esc(p.eyebrow)}</span>`:""}<${H} class="display">${esc(p.titulo||"")}</${H}>${p.frase?`<p class="lead">${esc(p.frase)}</p>`:""}${p.chip1||p.chip2?`<div class="row hchips">${p.chip1?`<span class="pill"><span class="dot"></span>${esc(p.chip1)}</span>`:""}${p.chip2?`<span class="pill">${ic("folder")}${esc(p.chip2)}</span>`:""}</div>`:""}${o.extra?`<div class="row hbtns">${o.extra}</div>`:""}</div>`}
 function heroImagen(p){return `<div class="hero-vis fondo" role="img" aria-label="Imágenes del tribunal">${slidesHTML(fondosPag(p))}</div>`}
 const portadaHero=(p,o)=>`<section class="hero${o&&o.cls?" "+o.cls:""}">${heroTexto(p,o)}${heroImagen(p)}</section>`;
@@ -1771,8 +1771,6 @@ const recargarAvisosPublicos=()=>sbFetch(AV_PUB,{auth:false}).then(r=>{ON.avisos
 function fueraDeLugar(){const adm=!!(ON.perfil&&ON.perfil.rol==="admin");
  if(MODO==="admin"&&!adm)return "Esta página es solo para la administración. Las demás cuentas entran por la página del tribunal: "+URL_TRIB.slice(8);
  if(MODO==="tribunal"&&adm)return "Esta cuenta es de administración y entra por su propia página.";return""}
-function eleccionLocal(){return `<div class="stack fbform compacto"><h2 class="pth">¿Con qué perfil desea entrar?</h2><p class="small t2 ptsub">Versión sin internet: los casos de demostración vienen dentro de este archivo.</p><div class="rgrid">${RAPIDO.map(([u,n,i])=>`<button class="rbtn" data-act="local" data-v="${u}"><span class="itile sm">${ic(i)}</span>${n}</button>`).join("")}</div><p class="xs t2 ptnota">Para cuentas reales, permisos y documentos en la nube, use la página con internet.</p></div>`}
-A.local=v=>{if(MODO!=="local"||!ROLES[v])return"keep";S.pending=null;S.role=v;S.chat=[];S.screen=landing();logEv("Entrada sin internet como "+ROLN[v])};
 function entrarCompacto(f,dis,err,msg){const p=PAG();return `<form class="stack fbform compacto" data-submit="entrar" novalidate>${p.entrarT?`<h2 class="pth">${esc(p.entrarT)}</h2>`:""}${p.entrarS?`<p class="small t2 ptsub">${esc(p.entrarS)}</p>`:""}${msg}
 <div class="g2c"><input type="text" id="lEmail" placeholder="Usuario" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(f.email||"")}" aria-label="Usuario"><input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña"></div>${err}
 <button class="btn block lg" type="submit"${dis}>${ON.ocupado?"Entrando...":"Iniciar sesión"}</button>
@@ -1781,7 +1779,7 @@ function viewPortada(fresh,form,reg){const p=PAG(),dis=ON.ocupado?" disabled":""
  const rap=ACCESO_RAPIDO&&!reg?`<div class="ptrap"><span class="xs t2">Acceso rápido de demostración</span><div class="rrow">${RAPIDO.map(([u,n,i])=>`<button class="rchip" data-act="rapido" data-v="${u}"${dis}>${ic(i)}${n}</button>`).join("")}</div></div>`:"";
  return `<div class="pantalla">`+band()+`<div class="auth fit${fresh?" anim":""}"><section class="portada"><div class="pt-izq">${heroTexto(p)}<div class="card ptlogin">${form}</div>${rap}${navs?`<button class="btn sec sm ptavisos" data-act="veravisos">${ic("book")}${esc(p.avisosT||"Para leer")}<span class="ufn">${navs}</span></button>`:""}</div><div class="pt-der">${heroImagen(p)}</div></section></div>`+foot()+ayudaHTML()+`</div>`}
 A.veravisos=()=>{S.modal=()=>`<div class="overlay" data-act="close"><div class="modal stack mavisos" role="dialog" aria-modal="true" aria-label="Avisos"><div class="mhd"><span class="itile sm">${ic("book")}</span><h2 style="flex:1">${esc(PAG().avisosT||"Para leer")}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>${avisosHTML(ON.avisos,"")||'<p class="t2">No hay avisos por ahora.</p>'}</div></div>`};
-async function iniciar(){if(MODO==="local"){render();return}cargarPagina();const t=leerSesion();ON.restaurando=!!t;render();if(!t)return;ON.tok=t;
+async function iniciar(){cargarPagina();const t=leerSesion();ON.restaurando=!!t;render();if(!t)return;ON.tok=t;
  try{if(!(await refrescar()))throw new Error("sesión vencida");await cargarOnline();if(fueraDeLugar())throw new Error("lugar");S.role=ON.perfil.rol;S.pending=null;
   let v=null;try{v=JSON.parse(sessionStorage.getItem(VISTA_K)||"null")}catch(e){}
   if(v&&v.c&&v.c!==S.causa&&CAUSAS.some(c=>c.id===v.c))abrirCausa(v.c);
