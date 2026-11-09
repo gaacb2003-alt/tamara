@@ -12,7 +12,7 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 ## Cómo funciona
 
 1. **Crear cuenta:** cada persona se registra con un nombre de usuario y una contraseña. Entra con acceso de orientación general.
-2. **Administrador:** asigna a cada persona su perfil (Juez, Secretaría, Abogado, Justiciable o Tercero), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y gestiona las cuentas: cambiar nombre, usuario o contraseña (si alguien la olvida), suspender o eliminar. Cada persona puede cambiar su propia contraseña en Mi perfil.
+2. **Administrador:** asigna a cada persona su perfil (Juez, Secretaría, Abogado, Justiciable o Tercero), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y gestiona las cuentas: cambiar nombre, usuario o contraseña (si alguien la olvida), suspender o eliminar. Cada persona puede cambiar su propia contraseña en Mi perfil. El Juez puede además restablecer la contraseña de quien la olvidó.
 3. **Juez y Secretaría** ven todas las causas del tribunal y pasan de una a otra.
 4. **Todo queda guardado** en una base de datos SQL (Supabase / Postgres) con seguridad por fila: cada usuario solo puede leer lo que sus permisos le dejan. La bitácora está encadenada con SHA-256 y no se puede editar ni borrar.
 
@@ -30,5 +30,6 @@ Para presentar: entre como administrador y abra la **Guía de demostración**. E
 | `supabase/005_foto_perfil.sql` | Foto de perfil que sube cada persona |
 | `supabase/006_expediente_digital.sql` | Expediente digital: documentos en la nube con su huella SHA-256 |
 | `supabase/007_admin_cuentas.sql` | El administrador restablece contraseñas, cambia usuarios y elimina cuentas |
+| `supabase/008_juez_restablece_claves.sql` | El Juez también puede restablecer contraseñas (solo eso; nunca la del administrador) |
 
 La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.
