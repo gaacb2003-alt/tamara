@@ -17,7 +17,7 @@ Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y d
 4. **Juez y Secretaría** ven todas las causas del tribunal y pasan de una a otra sin repetir el código.
 5. **Todo queda guardado** en una base de datos SQL (Supabase / Postgres) con seguridad por fila: cada usuario solo puede leer lo que sus permisos le dejan. La bitácora está encadenada con SHA-256 y no se puede editar ni borrar.
 
-Sin cuenta: en la pantalla de entrada, **Abrir la demostración** recorre todo con los 5 perfiles y la guía paso a paso.
+Para presentar: entre como administrador y use **Ver la app como...** en Usuarios y permisos para mostrar lo que ve cada perfil o cada persona.
 
 ## Archivos
 
