@@ -1556,7 +1556,7 @@ A.ayudasend=()=>{const i=$("#qa");if(i)preguntaPublica(i.value);setTimeout(ayuda
 const PAG_DEF={eyebrow:"Asistente virtual tribunalicio",titulo:"Hola, soy Tamara.",frase:"Oriento sobre el proceso. No asesoro sobre el caso. Nunca decido.",chip1:"Conectada al tribunal",chip2:"Juzgado Demo · Casos ficticios",entrarT:"Entre con su cuenta",entrarS:"Cada perfil ve solo lo que le corresponde.",avisosT:"Para leer",fotos:[]};
 /* Fotos que cambian solas (suave, como Apple). Están en la carpeta pública "pagina" de la base */
 const FONDO_URL=n=>SB_URL+"/storage/v1/object/public/pagina/fondos/"+n+".jpg";
-const FONDOS_DEF=[1,2,3,4,5].map(i=>FONDO_URL("fondo_"+i)),FONDOS_ADM=[1,2,3,4].map(i=>FONDO_URL("admin_"+i));
+const FONDOS_DEF=[1,2,3,4,5].map(i=>FONDO_URL("pub_"+i)),FONDOS_ADM=[1,2,3,4].map(i=>FONDO_URL("adm_"+i));
 const fondosPag=p=>{const l=Array.isArray(p.fotos)?p.fotos.filter(okFoto).slice(0,8):[];return l.length?l:FONDOS_DEF};
 let slideI=0;
 function slidesHTML(f){const i=slideI%f.length;return f.map((u,k)=>`<div class="slide${k===i?" on":""}" style="background-image:url('${u}')"></div>`).join("")+(f.length>1?`<div class="dots" aria-hidden="true">${f.map((u,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>`:"")}
