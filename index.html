@@ -1146,7 +1146,7 @@ const langToggle=()=>S.role==="abogado"||S.role==="juez"||S.role==="secretaria"?
 function vCausas(){
  const rows=CAUSAS.map(c=>({c,L:lapsoDe(c),pend:sumsOf(c.id).filter(x=>x.st!=="ok").length})).sort((a,b)=>(a.L?a.L.vence:"9999").localeCompare(b.L?b.L.vence:"9999"));
  const pronto=rows.filter(r=>r.L&&r.L.restantes<=3).length,porVal=rows.reduce((s,r)=>s+r.pend,0);
- return head("Causas del tribunal",TRIB+". Abra cualquier causa activa del tribunal desde aquí.")+
+ return head("Causas del tribunal",TRIB+". Abra cualquier causa activa del tribunal desde aquí.",puedeCrearCausa()?`<button class="btn sm" data-act="ncausa">${ic("plus")}Nueva causa</button>`:"")+
 `<div class="grid g3 cstats"><div class="card stack" style="gap:6px"><div class="stat num">${CAUSAS.length}</div><p>causas activas</p></div>
 <div class="card stack" style="gap:6px"><div class="stat num">${pronto}</div><p>vencen en 3 días de despacho o menos</p></div>
 <div class="card stack" style="gap:6px"><div class="stat num">${porVal}</div><p>afirmaciones por validar</p></div></div>
@@ -1166,7 +1166,7 @@ function vInicio(){
  const t1=L?`<div class="ringrow"><div class="ringbox" role="img" aria-label="${L.transcurridos} de ${c.lapso} días">${ring(L.transcurridos/c.lapso)}<div class="ringc"><b class="num">${L.restantes}</b><span>de ${c.lapso}</span></div></div>
  <p>${tec?"días de despacho restantes para "+c.verbT:"días de despacho quedan para "+c.verbC}</p></div>`
   :`<div class="stack" style="gap:6px"><div class="stat md">Sin lapso en curso</div><p class="t2">El plazo para contestar empieza cuando conste la citación de la parte demandada.</p></div>`;
- return head(tec||m?"Exp. "+c.id:"Su causa",c.materia+" · "+TRIB,(m?`<button class="btn sec sm" data-act="go" data-v="causas">${ic("list")}Todas las causas</button>`:"")+(puedeEditarCausa()?`<button class="btn sec sm" data-act="ecausa" data-v="${c.id}">${ic("edit")}Editar causa</button>`:""))+heroInicio(c,L)+
+ return head(tec||m?"Exp. "+c.id:"Su causa",c.materia+" · "+TRIB,(m?`<button class="btn sec sm" data-act="go" data-v="causas">${ic("list")}Todas las causas</button>`:"")+(puedeEditarCausa()?`<button class="btn sec sm" data-act="ecausa" data-v="${c.id}">${ic("edit")}Editar causa</button>`:"")+(!m&&puedeCrearCausa()?`<button class="btn sm" data-act="ncausa">${ic("plus")}Nueva causa</button>`:""))+heroInicio(c,L)+
 `<div class="grid g3">
 <div class="card stack kpi"><span class="pill">${ic("cpu")}Reglas</span>${t1}
  <button class="btn ghost" data-act="go" data-v="lapsos">Ver el cálculo${ic("chev")}</button></div>
@@ -1299,7 +1299,7 @@ function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para 
 <p class="t2">Usuario: <b>${esc(usuarioDe(p.correo))}</b> · Perfil: <b>${ROLN[p.rol]}</b>${p.uso?" · Se registró como "+USON[p.uso].toLowerCase():""}</p>
 <div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}<button class="btn sec" data-act="miclave"${dis}>${ic("lock")}Cambiar mi contraseña</button></div>
 <p class="xs t3">En el teléfono puede tomarla con la cámara. La foto se recorta en cuadrado y se guarda en pequeño.</p></div></div>
-<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes",restablecer_claves:"Restablecer contraseñas",editar_causas:"Editar causas"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>${tarjetaClaves()}`}
+<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",expediente:"Expediente digital",subir_documentos:"Subir documentos",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes",restablecer_claves:"Restablecer contraseñas",editar_causas:"Editar causas",crear_causas:"Crear causas"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>${tarjetaClaves()}`}
 function tarjetaClaves(){if(!puede("restablecer_claves")||(!ON.preview&&ON.perfil.rol==="admin"))return"";const dis=ON.ocupado?" disabled":"";
  if(ON.claveDe!==ON.uid){ON.claveDe=ON.uid;ON.claveLista=null;rest("rpc/personas_para_clave",{method:"POST",body:{}}).then(r=>{ON.claveLista=r||[]},e=>{ON.claveLista=[];ON.claveErr=e.message}).then(()=>render())}
  const l=ON.claveLista;
@@ -1544,15 +1544,17 @@ window.addEventListener("popstate",e=>{const st=e.state;if(!st||!st.tamara||!ON.
  volviendo=true;S.modal=null;if(st.c&&st.c!==S.causa&&CAUSAS.some(c=>c.id===st.c))abrirCausa(st.c);S.screen=can(st.s)?st.s:landing();
  if(S.screen==="bitacora"){ON.bit=null;cargarBitacora()}render();volviendo=false});
 /* ========== Editar los datos de una causa (permiso editar_causas: Juez y Secretaría; el administrador lo da o lo quita) ========== */
-const puedeEditarCausa=()=>!!ON.activo&&puede("editar_causas");
+const puedeEditarCausa=()=>!!ON.activo&&puede("editar_causas"),puedeCrearCausa=()=>!!ON.activo&&puede("crear_causas");
 const ETAPAS=["Pendiente de citación","Contestación","Promoción de pruebas","Evacuación de pruebas","Informes","Sentencia","Ejecución"];
 function modalCausa(){return()=>{const d=ON.cDraft||{},dis=ON.ocupado?" disabled":"";
  const f=(k,l,max,tipo,extra)=>`<label class="pfld"><span>${l}</span><input type="${tipo||"text"}" data-ccampo="${k}" value="${esc(d[k]==null?"":String(d[k]))}"${max?` maxlength="${max}"`:""}${extra||""}></label>`;
- return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Editar causa" style="max-width:640px"><div class="mhd"><span class="itile sm">${ic("folder")}</span><h2>Editar Exp. ${esc(d.id)}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>
-<p class="t2 small">Cambie los datos que ve el tribunal. El cambio queda en la bitácora con su nombre.</p>
-<div class="cgrid">${f("corta","Nombre corto",40)}${f("materia","Descripción (materia)",120)}${f("actora","Parte actora",120)}${f("demandada","Parte demandada",120)}${f("etapa","Etapa",60,"text",' list="etapasL"')}<datalist id="etapasL">${ETAPAS.map(e=>`<option value="${e}">`).join("")}</datalist>${f("inicio","Inicio del lapso",0,"date")}${f("lapso","Días de despacho del lapso",0,"number",' min="1" max="365" inputmode="numeric"')}</div>
+ return `<div class="overlay"><div class="modal stack" role="dialog" aria-modal="true" aria-label="Editar causa" style="max-width:640px"><div class="mhd"><span class="itile sm">${ic(d.nueva?"plus":"folder")}</span><h2>${d.nueva?"Nueva causa":"Editar Exp. "+esc(d.id)}</h2><button class="iconbtn" data-act="close" aria-label="Cerrar">${ic("x")}</button></div>
+<p class="t2 small">${d.nueva?"Registre la causa en el tribunal. Su expediente arranca vacío: los documentos se suben después en Expediente digital. Queda en la bitácora con su nombre.":"Cambie los datos que ve el tribunal. El cambio queda en la bitácora con su nombre."}</p>
+<div class="cgrid">${d.nueva?f("id","Número de expediente",25,"text",' placeholder="Ej.: EXP-2026-0007" autocapitalize="characters"'):""}${f("corta","Nombre corto",40)}${f("materia","Descripción (materia)",120)}${f("actora","Parte actora",120)}${f("demandada","Parte demandada",120)}${f("etapa","Etapa",60,"text",' list="etapasL"')}<datalist id="etapasL">${ETAPAS.map(e=>`<option value="${e}">`).join("")}</datalist>${f("inicio","Inicio del lapso",0,"date")}${f("lapso","Días de despacho del lapso",0,"number",' min="1" max="365" inputmode="numeric"')}</div>
 <p class="xs t3">Si deja vacíos el inicio y los días, la causa queda «sin lapso en curso».</p>${ON.cErr?`<p class="err">${ic("alert")}${esc(ON.cErr)}</p>`:""}
-<div class="row"><button class="btn" data-act="ecausaok"${dis}>${ON.ocupado?"Guardando...":"Guardar cambios"}</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}}
+<div class="row"><button class="btn" data-act="ecausaok"${dis}>${ON.ocupado?"Guardando...":d.nueva?"Crear causa":"Guardar cambios"}</button><button class="btn sec" data-act="close">Cancelar</button></div></div></div>`}}
+A.ncausa=()=>{if(!puedeCrearCausa())return"keep";ON.cErr="";ON.cDraft={nueva:true,id:"",corta:"",materia:"",actora:"",demandada:"",etapa:"Admisión",inicio:"",lapso:""};S.modal=modalCausa();
+ setTimeout(()=>{const i=document.querySelector('[data-ccampo="id"]');if(i)i.focus()},0)};
 A.ecausa=v=>{const c=CAUSAS.find(x=>x.id===v);if(!c||!puedeEditarCausa())return"keep";ON.cErr="";
  ON.cDraft={id:c.id,corta:c.corta,materia:c.materia,actora:c.actora,demandada:c.demandada,etapa:c.etapa,inicio:c.inicio||"",lapso:c.lapso||""};S.modal=modalCausa();
  setTimeout(()=>{const i=document.querySelector('[data-ccampo="corta"]');if(i)i.focus()},0)};
@@ -1560,8 +1562,13 @@ document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.c
 A.ecausaok=()=>{const d=ON.cDraft;if(!d)return"keep";const t=k=>String(d[k]==null?"":d[k]).trim();
  const v={corta:t("corta"),materia:t("materia"),actora:t("actora"),demandada:t("demandada"),etapa:t("etapa"),inicio:t("inicio")||null,lapso:t("lapso")?parseInt(t("lapso"),10):null};
  const m=v.corta.length<2||v.corta.length>40?"El nombre corto debe tener de 2 a 40 letras.":v.materia.length<3?"Escriba la descripción de la causa (al menos 3 letras).":v.actora.length<2||v.demandada.length<2?"Escriba las dos partes.":v.etapa.length<2?"Escriba la etapa.":(v.inicio===null)!==(v.lapso===null)?"El inicio y los días del lapso van juntos: ponga los dos o deje los dos vacíos.":v.lapso!==null&&(isNaN(v.lapso)||v.lapso<1||v.lapso>365)?"El lapso debe ser de 1 a 365 días de despacho.":"";
- if(m){ON.cErr=m;return}
+ const nid=String(d.id||"").trim().toUpperCase();
+ const m2=m||(d.nueva&&!/^[A-Z0-9][A-Z0-9-]{2,24}$/.test(nid)?"El número de expediente debe tener de 3 a 25 letras, números o guiones (ej.: EXP-2026-0007).":"");
+ if(m2){ON.cErr=m2;return}
  ON.cErr="";ON.ocupado=true;render();
+ if(d.nueva){rest("causas",{method:"POST",body:Object.assign({id:nid,tribunal:TRIB},v),prefer:"return=minimal"})
+  .then(async()=>{ON.cDraft=null;await cargarOnline();S.modal=modalMsg("Causa creada","El Exp. "+nid+" ya está en el tribunal. Su expediente arranca vacío: suba los documentos en Expediente digital.")},e=>{ON.cErr=e.message})
+  .then(()=>{ON.ocupado=false;render()});return"keep"}
  rest("causas?id=eq."+encodeURIComponent(d.id),{method:"PATCH",body:v,prefer:"return=representation"})
   .then(async r=>{if(!r||!r.length)throw new Error("La base no aceptó el cambio: su perfil no tiene permiso para editar esta causa.");ON.cDraft=null;await cargarOnline();S.modal=modalMsg("Causa actualizada","Los datos del Exp. "+d.id+" ya están al día para todo el tribunal.")},e=>{ON.cErr=e.message})
   .then(()=>{ON.ocupado=false;render()});return"keep"};
