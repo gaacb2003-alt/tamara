@@ -1,4 +1,6 @@
-# Constanza · Asistente virtual tribunalicio
+# Sujú · Asistente virtual tribunalicio
+
+(Antes llamada Constanza; `original.html` conserva la versión original con ese nombre.)
 
 Prototipo académico del Grupo 1 (Hackatón USM, Facultad de Derecho). Casos y datos ficticios.
 
