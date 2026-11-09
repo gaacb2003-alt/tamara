@@ -40,5 +40,6 @@ Para presentar: entre como administrador y abra la **Guía de demostración**. E
 | `supabase/008_juez_restablece_claves.sql` | El Juez también puede restablecer contraseñas (solo eso; nunca la del administrador) |
 | `supabase/009_pagina_editable.sql` | Portada y avisos de la página del tribunal: todos los ven, solo el administrador los cambia |
 | `supabase/010_editar_causas.sql` | Juez y Secretaría editan los datos de las causas (el administrador da o quita el permiso) |
+| `supabase/011_admin_crea_cuentas.sql` | El administrador crea cuentas desde su panel (emergencias) |
 
 La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.
