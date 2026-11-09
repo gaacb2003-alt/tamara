@@ -453,6 +453,22 @@ input[type=email]:focus,input[type=password]:focus,select.fsel:focus{border-colo
 .mtx td{vertical-align:middle}
 .mtx tr.gr td{background:var(--fill);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);padding:8px 12px}
 .splash{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.uav.ft{object-fit:cover;padding:0;background:#E8E8ED}
+.whochip{display:inline-flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--sep2);flex:none;max-width:240px}
+.whochip:hover{background:var(--fill)}
+.whochip span{display:flex;flex-direction:column;line-height:1.15;min-width:0;text-align:left}
+.whochip b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.whochip small{font-size:11px;color:var(--text2)}
+.toast{position:fixed;top:84px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:999px;background:rgba(29,29,31,.92);color:#fff;font-size:15px;font-weight:500;box-shadow:0 12px 36px rgba(0,0,0,.25);animation:fadeUp .35s var(--ease) both;max-width:calc(100% - 24px)}
+.uav.md{width:40px;height:40px;font-size:14px}
+.uav.sm{width:30px;height:30px;font-size:12px}
+.uav.xl{width:120px;height:120px;font-size:38px;background:var(--blue-t);color:var(--blue-d);box-shadow:0 0 0 4px #fff,0 6px 18px rgba(0,0,0,.12)}
+.perfilc{display:flex;gap:28px;align-items:center;flex-wrap:wrap;padding:28px}
+.mebtn{width:100%;text-align:left;border-radius:12px;transition:background .12s}
+.mebtn:hover{background:rgba(0,0,0,.045)}
+.mavbtn{display:inline-grid;place-items:center;border-radius:50%}
+label.btn{cursor:pointer}
+label.btn.dis{opacity:.5;pointer-events:none}
 .nh{display:flex;align-items:center;gap:8px}
 .nh .iconbtn{width:30px;height:30px}
 .nedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -725,7 +741,7 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
-SCREENS.push(["usuarios","Usuarios y permisos"]);
+SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["perfil","Mi perfil"]);
 const ROLN={admin:"Administrador",juez:"Juez",secretaria:"Secretaría",abogado:"Abogado",justiciable:"Justiciable",tercero:"Tercero"};
 const USON={funcionario:"Funcionario del tribunal",abogado:"Abogado",ciudadano:"Ciudadano"};
 const ON={gi:null,gdone:{},gtab:"pasos",atab:"personas",activo:false,tok:null,uid:null,perfil:null,perm:new Set(),vista:"login",err:"",msg:"",ocupado:false,form:{},
@@ -789,7 +805,7 @@ async function cargarOnline(){
  S.causa=CAUSAS.some(c=>c.id===prev)?prev:CAUSAS.some(c=>c.id==="DEMO-0001")?"DEMO-0001":CAUSAS.length?CAUSAS[0].id:null;
  S.summary=S.causa?S.sums[S.causa]:[];
  const rol=ON.perfil.rol;
- ACCESS[rol]=SCREENS.map(x=>x[0]).filter(k=>k==="usuarios"?rol==="admin":perm.has(k));
+ ACCESS[rol]=SCREENS.map(x=>x[0]).filter(k=>k==="perfil"||(k==="usuarios"?rol==="admin":perm.has(k)));
  if(ON.preview){ON.allCausas=CAUSAS.slice();aplicarPreview()}
 }
 /* Vista previa del administrador: ver la app como un perfil o como una persona */
@@ -833,6 +849,7 @@ function efectivo(u,m){if(u.rol==="admin")return true;if(!u.activo)return false;
 const selU=()=>(ON.usuarios||[]).find(u=>u.id===ON.sel);
 const nomU=u=>u.nombre||usuarioDe(u.correo)||"usuario";
 const nomMod=k=>{const m=(ON.mods||[]).find(x=>x.clave===k);return m?m.nombre:k};
+const avatar=(p,c)=>p&&p.foto?`<img class="uav${c?" "+c:""} ft" src="${p.foto}" alt="">`:`<span class="uav${c?" "+c:""}">${esc(iniciales(p?nomU(p):"?"))}</span>`;
 const iniciales=n=>String(n||"?").trim().split(/\s+/).slice(0,2).map(x=>x.charAt(0)).join("").toUpperCase();
 async function tarea(fn,log){ON.ocupado=true;render();
  try{await fn();if(log)logEv(log);ON.cargandoAdmin=false;await cargarAdmin()}catch(e){S.modal=modalMsg("No se pudo guardar",e.message)}
@@ -884,7 +901,7 @@ const I={
 };
 const ic=(n,c)=>`<svg class="ic${c?" "+c:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 const emb=c=>`<span class="emb${c?" "+c:""}" aria-hidden="true">${ic("scale")}</span>`;
-const SICON={usuarios:"users",causas:"folder",inicio:"home",estado:"scale",resumen:"file",lapsos:"cal",orientacion:"chat",tiempo:"timer",seguridad:"shield",bitacora:"list"};
+const SICON={perfil:"user",usuarios:"users",causas:"folder",inicio:"home",estado:"scale",resumen:"file",lapsos:"cal",orientacion:"chat",tiempo:"timer",seguridad:"shield",bitacora:"list"};
 const RICON={admin:"shield",juez:"gavel",secretaria:"clip",abogado:"brief",justiciable:"user",tercero:"userx"};
 const GROUPS=[["Tribunal",["causas"]],["Causa",["inicio","estado","resumen","lapsos"]],["Asistente",["orientacion"]],["Pruebas en vivo",["tiempo","seguridad","bitacora"]],["Administración",["usuarios"]]];
 
@@ -919,6 +936,7 @@ function finish(){document.body.classList.toggle("gopen",S.guide);
  modalWas=!!S.modal;
  if(S.guide){document.body.insertAdjacentHTML("beforeend",viewGuide());if(!guideWas){const d=$(".drawer");if(d)d.classList.add("anim")}const b=$(".dbody");if(b)b.scrollTop=keepG}
  guideWas=!!S.guide;
+ const tt=$(".toast");if(tt)tt.remove();if(ON.toast&&S.role)document.body.insertAdjacentHTML("beforeend",`<div class="toast" role="status">${avatar(ON.perfil,"md")}<span>${esc(ON.toast)}</span></div>`);
  const gf=$(".gfloat");if(gf)gf.remove();
  const gfOff=!ON.activo&&!S.guide&&S.gi!=null&&!!S.role&&!S.modal,gfOn=esAdmin()&&!!S.role&&ON.gi!=null&&!S.guide&&!S.modal;document.body.classList.toggle("gfon",gfOff||gfOn);if(gfOff)document.body.insertAdjacentHTML("beforeend",viewGFloat());else if(gfOn)document.body.insertAdjacentHTML("beforeend",viewGFloatOn());
 }
@@ -933,7 +951,7 @@ function sidebar(){const r=ROLES[S.role],m=multi();
  return `<aside class="sb" aria-label="Navegación"><div class="brand">${emb("lg")}<div><b>Tamara</b><span>Asistente virtual tribunalicio</span></div></div>
 ${GROUPS.filter(([g])=>(g!=="Tribunal"||m)&&(g!=="Administración"||S.role==="admin")).map(([g,ks])=>`<div class="ng"><span class="nl">${g==="Causa"&&m?"Causa · Exp. "+S.causa:g}</span>${ks.map(k=>{const n=SCREENS.find(x=>x[0]===k)[1],on=k===S.screen;return `<button class="nv${on?" on":""}${can(k)?"":" lockd"}" data-act="go" data-v="${k}"${on?' aria-current="page"':""}><span class="nt">${ic(SICON[k])}</span><span>${n}</span>${can(k)?"":`<span class="lk" title="Bloqueado para este perfil">${ic("lock")}<span class="t3" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bloqueado</span></span>`}</button>`}).join("")}</div>`).join("")}
 <div class="spacer"></div>
-<div class="me"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>
+${ON.activo&&!ON.preview?`<button class="me mebtn" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"md")}<div><b>${esc(quien())}</b><span>Perfil: ${r.nombre} · Ver mi perfil</span></div></button>`:`<div class="me"><span class="itile sm">${ic(RICON[S.role])}</span><div><b>${esc(quien())}</b><span>Perfil: ${r.nombre}</span></div></div>`}
 <button class="btn sec sm block" data-act="logout">${ic("logout")}${ON.activo?"Cerrar sesión":"Cambiar perfil"}</button></aside>`}
 function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="causas";
  const crumb=ter?`<div class="crumb"><b>Orientación general</b><span class="t2">Sin acceso a expedientes</span></div>`
@@ -941,11 +959,11 @@ function toolbar(){const ter=S.role==="tercero",m=multi(),enCausas=S.screen==="c
   :m?`<div class="crumb"><b>${TRIB}</b><span class="t2">${CAUSAS.length} causas activas</span></div>`
   :`<div class="crumb"><b>${causaAct()?"Exp. "+causaAct().id:"Sin causas vinculadas"}</b><span class="t2">${TRIB}</span></div>`;
  return `<div class="tb">${crumb}<div class="spacer"></div>
-<span class="pill ok hide-s" title="Sesión iniciada con su cuenta">${ic("checkc")}Sesión iniciada</span>
+${ON.activo&&ON.perfil&&!ON.preview?`<button class="whochip hide-s" data-act="go" data-v="perfil" title="Mi perfil">${avatar(ON.perfil,"sm")}<span><b>${esc(quien())}</b><small>${ROLN[ON.perfil.rol]}</small></span></button>`:`<span class="pill ok hide-s" title="Sesión iniciada con su cuenta">${ic("checkc")}Sesión iniciada</span>`}
 ${ON.activo?'<span class="pill net hide-s"><span class="dot"></span>Base de datos conectada</span>':'<span class="pill net hide-s"><span class="dot"></span>Funciona sin internet</span>'}
 <button class="btn sec sm" data-act="guide">${ic("book")}<span class="hide-s">${ON.activo&&!esAdmin()?"Cómo funciona":"Guía de demostración"}</span><span class="show-s" style="display:none">Guía</span></button>
-<button class="iconbtn show-s" data-act="logout" aria-label="${ON.activo?"Cerrar sesión":"Cambiar perfil"}" title="${ON.activo?"Cerrar sesión":"Cambiar perfil"}">${ic("logout")}</button></div>
-<nav class="mnav" aria-label="Secciones">${SCREENS.filter(([k])=>(k!=="causas"||m)&&(k!=="usuarios"||S.role==="admin")).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
+${ON.activo&&!ON.preview?`<button class="show-s mavbtn" data-act="go" data-v="perfil" aria-label="Mi perfil">${avatar(ON.perfil,"sm")}</button>`:""}<button class="iconbtn show-s" data-act="logout" aria-label="${ON.activo?"Cerrar sesión":"Cambiar perfil"}" title="${ON.activo?"Cerrar sesión":"Cambiar perfil"}">${ic("logout")}</button></div>
+<nav class="mnav" aria-label="Secciones">${SCREENS.filter(([k])=>k!=="perfil"&&(k!=="causas"||m)&&(k!=="usuarios"||S.role==="admin")).map(([k,n])=>`<button data-act="go" data-v="${k}" class="${k===S.screen?"on":""}">${ic(SICON[k])}${n}${can(k)?"":`<span class="lk">${ic("lock")}</span>`}</button>`).join("")}</nav>`}
 function viewLogin(fresh){return S.demo?viewLoginDemo(fresh):viewAcceso(fresh)}
 function viewLoginDemo(fresh){const L=computeLapso(S.off);
  return band()+`<div class="auth${fresh?" anim":""}"><section class="hero"><div class="hero-txt">
@@ -971,7 +989,7 @@ ${S.codeErr?`<p class="err">${ic("alert")}Código incorrecto. El intento quedó 
 function denied(what){return `<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Acceso denegado</h2><p class="t2">${esc(what)}</p><p class="small t3">El intento quedó registrado en la bitácora.</p></div>`}
 function screen(s){if(ON.activo&&ON.perfil&&!ON.perfil.activo)return suspendida();if(!can(s))return denied("Su perfil ("+ROLES[S.role].nombre+") no tiene permiso para ver esta sección. Esta causa solo está disponible para el tribunal, las partes y sus apoderados.");
  if(["inicio","estado","resumen","lapsos"].includes(s)&&!(s==="inicio"&&S.role==="tercero")&&!causaAct())return sinCausas();
- return({causas:vCausas,usuarios:vUsuarios,inicio:vInicio,estado:vEstado,resumen:vResumen,lapsos:vLapsos,orientacion:vOrient,tiempo:vTiempo,seguridad:vSeg,bitacora:vBit})[s]()}
+ return({perfil:vPerfil,causas:vCausas,usuarios:vUsuarios,inicio:vInicio,estado:vEstado,resumen:vResumen,lapsos:vLapsos,orientacion:vOrient,tiempo:vTiempo,seguridad:vSeg,bitacora:vBit})[s]()}
 const langToggle=()=>S.role==="abogado"||S.role==="juez"||S.role==="secretaria"?`<div class="seg" role="group" aria-label="Tipo de lectura"><button class="${S.simple?"":"on"}"${S.simple?' data-act="simple"':""} aria-pressed="${!S.simple}">Lectura técnica</button><button class="${S.simple?"on":""}"${S.simple?"":' data-act="simple"'} aria-pressed="${S.simple}">Lenguaje claro</button></div>`:"";
 
 function vCausas(){
@@ -1112,7 +1130,7 @@ function vUsuarios(){
  const U=ON.usuarios,u=selU()||U[0],tabP=ON.atab==="perfiles";
  const tabs=`<div class="seg atabs" role="tablist"><button role="tab" class="${tabP?"":"on"}"${tabP?' data-act="atab" data-v="personas"':""}>${ic("users")}Personas</button><button role="tab" class="${tabP?"on":""}"${tabP?"":' data-act="atab" data-v="perfiles"'}>${ic("shield")}Permisos por perfil</button></div>`;
  const pend=U.filter(x=>x.rol==="tercero"&&x.uso&&x.uso!=="ciudadano").length;
- const lista=U.map(x=>`<button class="urow${u&&x.id===u.id?" cur":""}" data-act="usel" data-v="${x.id}" data-s="${esc(norm(nomU(x)+" "+(x.correo||"")))}"><span class="uav">${esc(iniciales(nomU(x)))}</span><span class="umain"><b>${esc(nomU(x))}${x.id===ON.uid?' <span class="t3">(usted)</span>':""}</b><span class="xs t2">Usuario: ${esc(usuarioDe(x.correo))}</span></span><span class="ubad"><span class="pill${x.rol==="admin"?" info":""}">${ROLN[x.rol]}</span>${x.activo?"":`<span class="pill bad">Suspendida</span>`}</span></button>`).join("");
+ const lista=U.map(x=>`<button class="urow${u&&x.id===u.id?" cur":""}" data-act="usel" data-v="${x.id}" data-s="${esc(norm(nomU(x)+" "+(x.correo||"")))}">${avatar(x)}<span class="umain"><b>${esc(nomU(x))}${x.id===ON.uid?' <span class="t3">(usted)</span>':""}</b><span class="xs t2">Usuario: ${esc(usuarioDe(x.correo))}</span></span><span class="ubad"><span class="pill${x.rol==="admin"?" info":""}">${ROLN[x.rol]}</span>${x.activo?"":`<span class="pill bad">Suspendida</span>`}</span></button>`).join("");
  return head("Usuarios y permisos",`Base de datos de las personas registradas: ${U.length} en total. Asigne a cada una su perfil y lo que puede ver y hacer.`,`<button class="btn sec sm" data-act="ucsv">${ic("doc")}Descargar lista</button><button class="btn sec sm" data-act="uref">${ic("refresh")}Actualizar</button>`)+
  (pend?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small"><b>${pend}</b> ${pend===1?"persona registrada como funcionario o abogado espera":"personas registradas como funcionario o abogado esperan"} que le asigne su perfil.</p></div>`:"")+
  `<div style="margin-bottom:16px">${tabs}</div><div class="card stack" style="margin-bottom:16px;gap:12px"><div><h3>Ver la app como...</h3><p class="small t2" style="margin-top:2px">Muestra exactamente lo que ve cada perfil con sus permisos actuales. Abogado y Justiciable se muestran con la causa DEMO-0001.</p></div><div class="row">${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<button class="btn sec sm" data-act="ver" data-v="${r}">${ic(RICON[r])}${ROLN[r]}</button>`).join("")}</div></div>
@@ -1128,7 +1146,7 @@ function detalleUsuario(u){const yo=u.id===ON.uid,adm=u.rol==="admin",dis=ON.ocu
  const pant=(ON.mods||[]).filter(m=>m.tipo==="pantalla"),acc=(ON.mods||[]).filter(m=>m.tipo==="accion"),o=ON.overr[u.id]||{};
  const fila=m=>{const on=efectivo(u,m.clave),aj=o[m.clave]!==undefined;return `<div class="prow"><span>${m.nombre}${aj?` <span class="pill info">Ajustado</span>`:""}</span><button class="sw${on?" on":""}" role="switch" aria-checked="${on}" aria-label="${esc(m.nombre)}" data-act="uperm" data-v="${m.clave}"${adm||!u.activo?" disabled":dis}><i></i></button></div>`};
  const vin=ON.vinc[u.id]||new Set();
- return `<div class="row" style="gap:14px;flex-wrap:nowrap;align-items:center"><span class="uav lg">${esc(iniciales(nomU(u)))}</span><div style="min-width:0;flex:1">${ON.editNom===u.id?`<div class="nedit"><input type="text" id="uNombre" value="${esc(u.nombre||"")}" maxlength="80" aria-label="Nombre" data-enter="unomsave"><button class="btn sm" data-act="unomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="unom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(u))}<button class="iconbtn" data-act="unom" data-v="${u.id}" aria-label="Editar nombre" title="Editar nombre">${ic("edit")}</button></h2>`}<p class="small t2">Usuario: <b>${esc(usuarioDe(u.correo))}</b> · Registrado el ${fLarga(String(u.creado).slice(0,10))}${u.uso?" · Se registró como: "+USON[u.uso]:""}<br>Último ingreso: ${ON.ultimo&&ON.ultimo[u.id]?new Date(ON.ultimo[u.id]).toLocaleString("es-VE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"todavía no ha entrado"}</p></div>${adm?"":`<button class="btn sec sm" data-act="ver" data-v="u:${u.id}">${ic("eye")}Ver como esta persona</button>`}</div>
+ return `<div class="row" style="gap:14px;flex-wrap:nowrap;align-items:center">${avatar(u,"lg")}<div style="min-width:0;flex:1">${ON.editNom===u.id?`<div class="nedit"><input type="text" id="uNombre" value="${esc(u.nombre||"")}" maxlength="80" aria-label="Nombre" data-enter="unomsave"><button class="btn sm" data-act="unomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="unom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(u))}<button class="iconbtn" data-act="unom" data-v="${u.id}" aria-label="Editar nombre" title="Editar nombre">${ic("edit")}</button></h2>`}<p class="small t2">Usuario: <b>${esc(usuarioDe(u.correo))}</b> · Registrado el ${fLarga(String(u.creado).slice(0,10))}${u.uso?" · Se registró como: "+USON[u.uso]:""}<br>Último ingreso: ${ON.ultimo&&ON.ultimo[u.id]?new Date(ON.ultimo[u.id]).toLocaleString("es-VE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"todavía no ha entrado"}</p></div>${adm?"":`<button class="btn sec sm" data-act="ver" data-v="u:${u.id}">${ic("eye")}Ver como esta persona</button>`}</div>
 <div class="ugrid"><div class="stack" style="gap:8px"><span class="lbl">Perfil</span>${adm?`<p class="t2 small">Administrador: tiene todos los permisos.</p>`:`<select class="csel" data-change="urol" aria-label="Perfil de ${esc(nomU(u))}"${dis}>${["juez","secretaria","abogado","justiciable","tercero"].map(r=>`<option value="${r}"${u.rol===r?" selected":""}>${ROLN[r]}</option>`).join("")}</select><p class="xs t2">Al cambiar el perfil se cargan sus permisos sugeridos.</p>`}</div>
 <div class="stack" style="gap:8px"><span class="lbl">Cuenta</span><div class="prow" style="padding:6px 0;border:0"><span>${u.activo?"Activa":"Suspendida"}</span><button class="sw${u.activo?" on":""}" role="switch" aria-checked="${u.activo}" aria-label="Cuenta activa" data-act="uact"${yo?" disabled":dis}><i></i></button></div>${yo?`<p class="xs t2">No puede suspender su propia cuenta.</p>`:""}</div></div>
 <div class="pgrid"><div><h3 class="mb">Pantallas que puede ver</h3>${pant.map(fila).join("")}</div>
@@ -1152,6 +1170,13 @@ function viewAcceso(fresh){const reg=ON.vista==="registro",f=ON.form,dis=ON.ocup
 <button type="button" class="btn ghost" data-act="vlog"${dis}>¿Ya tiene cuenta? Iniciar sesión</button></form>`;
  return band()+`<div class="auth${fresh?" anim":""}"><section class="fb"><div class="fb-photo" style="background-image:url(${IMG.foto})" role="img" aria-label="Abogados conversando en las escaleras de un tribunal"><div class="fb-ov"><span class="eyebrow">Asistente virtual tribunalicio</span><h1 class="display">Tamara</h1><p class="lead">Oriento sobre el proceso. No asesoro sobre el caso. Nunca decido.</p></div></div>
 <div class="fb-r"><div class="card fbcard">${reg?registro:entrar}</div>${ACCESO_RAPIDO&&!reg?`<div class="card rapido"><div class="row between"><h3>Acceso rápido</h3><span class="pill">Demostración</span></div><button class="btn block lg" data-act="rapido" data-v="admin"${dis}>${ic("shield")}Entrar como Administrador</button><div class="rgrid">${RAPIDO.map(([u,n,i])=>`<button class="rbtn" data-act="rapido" data-v="${u}"${dis}><span class="itile sm">${ic(i)}</span>${n}</button>`).join("")}</div></div>`:""}<ol class="pasos"><li><b>Cree su cuenta</b><span>Con un nombre de usuario y una contraseña.</span></li><li><b>El administrador autoriza su perfil</b><span>Juez, Secretaría, Abogado, Justiciable o Tercero, y qué puede ver y hacer.</span></li><li><b>Entre y trabaje</b><span>Cada vez que entra ve solo lo que le corresponde.</span></li></ol></div></section></div>`+foot()}
+function vPerfil(){if(!ON.activo||!ON.perfil)return denied("Inicie sesión para ver su perfil.");const p=ON.perfil,dis=ON.ocupado?" disabled":"";
+ return head("Mi perfil","Su foto y su nombre. Los ven usted y el administrador.")+`<div class="card perfilc">${avatar(p,"xl")}
+<div class="stack" style="gap:6px;flex:1;min-width:240px">${ON.editMine?`<div class="nedit"><input type="text" id="miNombre" value="${esc(p.nombre||"")}" maxlength="80" aria-label="Su nombre" data-enter="minomsave"><button class="btn sm" data-act="minomsave"${dis}>Guardar</button><button class="btn sec sm" data-act="minom" data-v="">Cancelar</button></div>`:`<h2 class="nh">${esc(nomU(p))}<button class="iconbtn" data-act="minom" data-v="1" aria-label="Cambiar mi nombre" title="Cambiar mi nombre">${ic("edit")}</button></h2>`}
+<p class="t2">Usuario: <b>${esc(usuarioDe(p.correo))}</b> · Perfil: <b>${ROLN[p.rol]}</b>${p.uso?" · Se registró como "+USON[p.uso].toLowerCase():""}</p>
+<div class="row" style="margin-top:10px"><label class="btn${ON.ocupado?" dis":""}" for="fotoIn">${ic("user")}${p.foto?"Cambiar foto":"Subir foto"}</label><input type="file" id="fotoIn" accept="image/*" hidden>${p.foto?`<button class="btn sec" data-act="quitarfoto"${dis}>${ic("trash")}Quitar foto</button>`:""}</div>
+<p class="xs t3">En el teléfono puede tomarla con la cámara. La foto se recorta en cuadrado y se guarda en pequeño.</p></div></div>
+<div class="card stack" style="margin-top:16px"><h3>Lo que puede hacer en Tamara</h3><div class="chips">${(ON.mods||[]).length?"":""}${[...ON.perm].map(k=>`<span class="pill">${ic("checkc")}${{causas:"Causas del tribunal",inicio:"Inicio",estado:"Estado de la causa",resumen:"Resumen con folios",lapsos:"Control de lapsos",orientacion:"Orientación",tiempo:"Prueba de tiempo",seguridad:"Laboratorio de seguridad",bitacora:"Bitácora",validar_resumen:"Validar resúmenes",editar_calendario:"Editar el calendario",ver_identificacion:"Ver identificación de las partes"}[k]||k}</span>`).join("")}</div><p class="xs t3">Lo decide el administrador. Si necesita algo más, pídaselo.</p></div>`}
 const sinCausas=()=>`<div class="card denied"><span class="itile lg gray">${ic("folder")}</span><h2>Sin causas vinculadas</h2><p class="t2">Su cuenta todavía no tiene causas asignadas. El administrador debe vincularle las causas en las que participa.</p></div>`;
 const suspendida=()=>`<div class="card denied"><span class="itile lg gray">${ic("lock")}</span><h2>Cuenta suspendida</h2><p class="t2">El administrador suspendió esta cuenta. Comuníquese con el tribunal para reactivarla.</p></div>`;
 
@@ -1292,7 +1317,7 @@ A.rapido=v=>{if(!ACCESO_RAPIDO)return"keep";entrarCon(v,CLAVE_DEMO)};
 function entrarCon(usu,pass){const email=aEmail(usu);ON.form.email=usu;ON.msg="";
  if(!usu||!pass){ON.err="Escriba su usuario y su contraseña.";return}
  ON.err="";ON.ocupado=true;
- (async()=>{try{const t=await sbFetch("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pass},auth:false});ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Inicio de sesión")}
+ (async()=>{try{const t=await sbFetch("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pass},auth:false});ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Inicio de sesión");saludar()}
   catch(e){ON.err=e.message;ON.tok=null;guardarSesion(null);ON.activo=false}ON.ocupado=false;render()})()};
 A.registrar=()=>{const usu=(($("#rEmail")||{}).value||"").trim().toLowerCase(),pass=($("#rPass")||{}).value||"",uso=($("#rUso")||{}).value||"",nombre=usu,email=aEmail(usu);
  Object.assign(ON.form,{email:usu,uso});
@@ -1301,7 +1326,7 @@ A.registrar=()=>{const usu=(($("#rEmail")||{}).value||"").trim().toLowerCase(),p
  if(!uso){ON.err="Elija cómo va a usar Tamara.";return}
  ON.err="";ON.ocupado=true;
  (async()=>{try{const t=await sbFetch("/auth/v1/signup",{method:"POST",body:{email,password:pass,data:{nombre,uso}},auth:false});
-   if(t&&t.access_token){ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Cuenta creada e inicio de sesión")}
+   if(t&&t.access_token){ON.tok=t;guardarSesion(t);await cargarOnline();S.pending=null;S.role=ON.perfil.rol;S.screen=landing();logEv("Cuenta creada e inicio de sesión");saludar()}
    else{ON.vista="login";ON.msg="Cuenta creada, pero falta activarla: el administrador debe desactivar la confirmación por correo en Supabase."}}
   catch(e){ON.err=e.message}ON.ocupado=false;render()})()};
 const _verifyOnline=A.verify;A.verify=()=>{if(S.pending!=="__online")return _verifyOnline();
@@ -1324,6 +1349,21 @@ A.ver=v=>{if(!ON.activo||!ON.perfil||ON.perfil.rol!=="admin")return"keep";
  else entrarPreview({rol:v,nombre:"el perfil "+ROLN[v],perm:new Set(ON.plant[v]||[]),causas:new Set(["DEMO-0001"])})};
 A.salirver=()=>{salirPreview()};
 A.atab=v=>{ON.atab=v};
+A.minom=v=>{ON.editMine=!!v;if(v)setTimeout(()=>{const i=$("#miNombre");if(i){i.focus();i.select()}},0)};
+A.minomsave=()=>{const n=(($("#miNombre")||{}).value||"").trim().replace(/\s+/g," ");if(n.length<2){S.modal=modalMsg("No se pudo guardar","Escriba un nombre de al menos 2 letras.");return}
+ ON.editMine=false;if(n===ON.perfil.nombre)return;ON.ocupado=true;
+ rest("perfiles?id=eq."+ON.uid,{method:"PATCH",body:{nombre:n},prefer:"return=minimal"}).then(()=>{ON.perfil.nombre=n;logEv("Perfil: nombre actualizado")},e=>{S.modal=modalMsg("No se pudo guardar",e.message)}).then(()=>{ON.ocupado=false;ON.usuarios=null;render()})};
+A.quitarfoto=()=>{guardarFoto(null);return"keep"};
+function saludar(){ON.toast="Hola, "+quien()+". Entró como "+ROLN[ON.perfil.rol]+".";clearTimeout(ON.toastT);ON.toastT=setTimeout(()=>{ON.toast="";const t=$(".toast");if(t)t.remove()},5000)}
+function guardarFoto(f){ON.ocupado=true;render();
+ rest("perfiles?id=eq."+ON.uid,{method:"PATCH",body:{foto:f},prefer:"return=minimal"}).then(()=>{ON.perfil.foto=f;logEv(f?"Perfil: foto actualizada":"Perfil: foto quitada")},e=>{S.modal=modalMsg("No se pudo guardar la foto",e.message)}).then(()=>{ON.ocupado=false;ON.usuarios=null;render()})}
+function prepararFoto(file){return new Promise((ok,mal)=>{if(!file||!/^image\//.test(file.type)){mal(new Error("Elija un archivo de imagen (JPG o PNG)."));return}
+ const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{const T=320,c=document.createElement("canvas");c.width=c.height=T;const x=c.getContext("2d"),l=Math.min(img.naturalWidth,img.naturalHeight);
+  x.fillStyle="#fff";x.fillRect(0,0,T,T);x.drawImage(img,(img.naturalWidth-l)/2,(img.naturalHeight-l)/2,l,l,0,0,T,T);URL.revokeObjectURL(url);ok(c.toDataURL("image/jpeg",0.85))};
+ img.onerror=()=>{URL.revokeObjectURL(url);mal(new Error("No se pudo leer esa imagen. Pruebe con una foto JPG o PNG."))};img.src=url})}
+document.addEventListener("change",e=>{const t=e.target;if(t.id!=="fotoIn"||!t.files||!t.files[0])return;
+ prepararFoto(t.files[0]).then(guardarFoto,err=>{S.modal=modalMsg("No se pudo subir la foto",err.message);render()})});
 A.ucsv=()=>{const U=ON.usuarios||[];const q=x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"';
  const f=d=>d?new Date(d).toLocaleString("es-VE"):"";
  const filas=[["Nombre","Usuario","Perfil","Se registró como","Estado","Registrado","Último ingreso","Causas vinculadas"]].concat(U.map(u=>[u.nombre,usuarioDe(u.correo),ROLN[u.rol],u.uso?USON[u.uso]:"",u.activo?"Activa":"Suspendida",f(u.creado),f(ON.ultimo&&ON.ultimo[u.id]),[...(ON.vinc[u.id]||[])].join(" ")]));
