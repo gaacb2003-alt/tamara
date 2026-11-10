@@ -19,7 +19,7 @@ La seguridad la hace cumplir la base de datos (reglas por fila), no la página.
 ## Cómo funciona
 
 1. **Crear cuenta:** cada persona se registra con un nombre de usuario y una contraseña. Entra con acceso de orientación general.
-2. **Administrador:** asigna a cada persona su perfil (Juez, Secretaría, Abogado, Justiciable o Tercero), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y gestiona las cuentas: cambiar nombre, usuario o contraseña (si alguien la olvida), suspender o eliminar. Cada persona puede cambiar su propia contraseña en Mi perfil. El Juez puede además restablecer la contraseña de quien la olvidó.
+2. **Administrador:** asigna a cada persona su perfil (Juez(a), Secretaria(o), Abogado(a), Justiciable o Asistente), enciende o apaga pantallas y acciones por persona, vincula causas a abogados y justiciables, y gestiona las cuentas: cambiar nombre, usuario o contraseña (si alguien la olvida), suspender o eliminar. Cada persona puede cambiar su propia contraseña en Mi perfil. El Juez puede además restablecer la contraseña de quien la olvidó.
 3. **Juez y Secretaría** ven todas las causas del tribunal y pasan de una a otra.
 4. **Todo queda guardado** en una base de datos SQL (Supabase / Postgres) con seguridad por fila: cada usuario solo puede leer lo que sus permisos le dejan. La bitácora está encadenada con SHA-256 y no se puede editar ni borrar.
 
@@ -44,5 +44,6 @@ Para presentar: entre como administrador y abra la **Guía de demostración**. E
 | `supabase/012_crear_causas.sql` | Crear causas nuevas: el administrador siempre; a otros si les da el permiso |
 | `supabase/013_editar_folios.sql` | Juez y Secretaría modifican folios; la bitácora guarda la huella anterior y la nueva |
 | `supabase/014_numeros_consecutivos.sql` a `018_foto_solo_admin.sql` | Números consecutivos, cambiar número de folio, anexos por folio, contraseñas y fotos solo por el administrador |
+| `supabase/019_nombres_perfiles.sql` | Nombres de perfil: Juez(a), Secretaria(o), Abogado(a), Justiciable y Asistente |
 
 La página solo contiene la clave pública del proyecto; los permisos los hace cumplir la base de datos.

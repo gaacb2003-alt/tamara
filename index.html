@@ -851,7 +851,7 @@ function logEv(accion){const prev=S.log.length?S.log[S.log.length-1].hash:"0".re
  const actor=S.role?ROLES[S.role].nombre:"Sistema";const e={hora,actor,accion,prev};e.hash=sha256(prev+hora+actor+accion);S.log.push(e)}
 function verifyChain(){let p="0".repeat(64);for(let i=0;i<S.log.length;i++){const e=S.log[i];if(e.prev!==p||sha256(p+e.hora+e.actor+e.accion)!==e.hash)return i;p=e.hash}return -1}
 const can=sc=>S.role&&ACCESS[S.role].includes(sc);
-const clear=()=>S.role==="justiciable"||S.role==="tercero"||S.simple;
+const clear=()=>S.role==="tercero"||(S.role==="justiciable"?!S.simple:S.simple);
 
 /* ========== Orientación: respuestas programadas con fuentes cerradas ========== */
 const INT=[
@@ -978,12 +978,14 @@ logEv=function(a){const t=ctxLog&&multi()?a+" · Exp. "+folioCausa():a;const r=_
 /* ========== Conexión con la base de datos (Supabase) ========== */
 const SB_URL="https://kgbwofkyonbrwajkyrke.supabase.co",SB_KEY="sb_publishable_6Y9Te_OcEWNrbGQ48e2U4g_sippJPbS";
 /* Dos páginas salen de este mismo archivo: "tribunal" (todas las personas) y "admin" (solo administración) */
-const VERSION="20261108-232628",MODO="tribunal",LOCAL=false,URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
+const VERSION="20261109-233451",MODO="tribunal",LOCAL=false,URL_TRIB="https://gaacb2003-alt.github.io/tamara/";
 
 const CAUSAS_LOCAL=JSON.parse(JSON.stringify(CAUSAS)),ACCESS_LOCAL=JSON.parse(JSON.stringify(ACCESS));
 ROLES.admin={nombre:"Administrador",desc:"Asigna perfiles y permisos a las personas registradas.",quien:"Administrador"};
 SCREENS.push(["usuarios","Usuarios y permisos"]);SCREENS.push(["pagina","Página del tribunal"]);SCREENS.push(["perfil","Mi perfil"]);SCREENS.push(["expediente","Expediente digital"]);
-const ROLN={admin:"Administrador",juez:"Juez",secretaria:"Secretaría",abogado:"Abogado",justiciable:"Justiciable",tercero:"Tercero"};
+const ROLN={admin:"Administrador",juez:"Juez(a)",secretaria:"Secretaria(o)",abogado:"Abogado(a)",justiciable:"Justiciable",tercero:"Asistente"};
+/* los mismos nombres en los textos heredados del original («Vista de…», «Perfil: …») */
+Object.keys(ROLN).forEach(k=>{if(ROLES[k])ROLES[k].nombre=ROLN[k]});if(ROLES.tercero)ROLES.tercero.quien="Asistente del tribunal";
 const USON={funcionario:"Funcionario del tribunal",abogado:"Abogado",ciudadano:"Ciudadano"};
 const ON={gi:null,gdone:{},gtab:"pasos",atab:"personas",activo:false,tok:null,uid:null,perfil:null,perm:new Set(),vista:"login",err:"",msg:"",ocupado:false,form:{},
  usuarios:null,mods:null,plant:{},overr:{},vinc:{},sel:null,uq:"",cargandoAdmin:false,adminErr:"",bit:null,chainDb:null};
@@ -1229,7 +1231,8 @@ function denied(what){return `<div class="card denied"><span class="itile lg gra
 function screen(s){if(ON.activo&&ON.perfil&&!ON.perfil.activo)return suspendida();if(!can(s))return denied("Su perfil ("+ROLES[S.role].nombre+") no tiene permiso para ver esta sección. Esta causa solo está disponible para el tribunal, las partes y sus apoderados.");
  if(["inicio","estado","resumen","lapsos","expediente"].includes(s)&&!(s==="inicio"&&S.role==="tercero")&&!causaAct())return sinCausas();
  return({expediente:vExpediente,perfil:vPerfil,causas:vCausas,inicio:vInicio,estado:vEstado,resumen:vResumen,lapsos:vLapsos,orientacion:vOrient,tiempo:vTiempo,seguridad:vSeg,bitacora:vBit})[s]()}
-const langToggle=()=>S.role==="abogado"||S.role==="juez"||S.role==="secretaria"?`<div class="seg" role="group" aria-label="Tipo de lectura"><button class="${S.simple?"":"on"}"${S.simple?' data-act="simple"':""} aria-pressed="${!S.simple}">Lectura técnica</button><button class="${S.simple?"on":""}"${S.simple?"":' data-act="simple"'} aria-pressed="${S.simple}">Lenguaje claro</button></div>`:"";
+const langToggle=()=>{if(["abogado","juez","secretaria","justiciable"].indexOf(S.role)<0)return"";const cl=clear();
+ return `<div class="seg" role="group" aria-label="Tipo de lectura"><button class="${cl?"":"on"}"${cl?' data-act="simple"':""} aria-pressed="${!cl}">Lectura técnica</button><button class="${cl?"on":""}"${cl?"":' data-act="simple"'} aria-pressed="${cl}">Lenguaje claro</button></div>`};
 
 function vCausas(){
  const rows=CAUSAS.map(c=>({c,L:lapsoDe(c),pend:sumsOf(c.id).filter(x=>x.st!=="ok").length})).sort((a,b)=>(a.L?a.L.vence:"9999").localeCompare(b.L?b.L.vence:"9999"));
@@ -1249,7 +1252,7 @@ ${ic("chev","cchev")}</button>`).join("")}</div>
 }
 function vInicio(){
  const c=causaAct(),L=lapsoDe(c),m=multi();
- if(S.role==="tercero")return head("Bienvenido"+(ON.activo&&ON.perfil.nombre?", "+esc(ON.perfil.nombre.split(" ")[0]):""))+heroInicio(null,null)+(ON.activo?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small">Su cuenta está activa con acceso de orientación general. El administrador le asignará su perfil y sus causas; cuando lo haga, lo verá al cambiar de pantalla.</p></div>`:"")+`<div class="card stack" style="gap:18px"><div class="row" style="gap:16px;align-items:flex-start;flex-wrap:nowrap">${emb("md")}<p class="big">Como persona ajena a la causa, puede usar la orientación general sobre cómo funciona un proceso. No puede ver expedientes.</p></div><div class="row"><button class="btn" data-act="go" data-v="orientacion">${ic("chat")}Ir a orientación</button>${!ON.activo||ON.preview?`<button class="btn sec" data-act="go" data-v="estado">${ic("lock")}Intentar abrir el expediente</button>`:""}</div></div>`+avisosHTML(ON.avisos,PAG().avisosT);
+ if(S.role==="tercero")return head("Bienvenido"+(ON.activo&&ON.perfil.nombre?", "+esc(ON.perfil.nombre.split(" ")[0]):""))+heroInicio(null,null)+(ON.activo?`<div class="banner info" style="margin-bottom:16px">${ic("user")}<p class="small">Su cuenta está activa con acceso de orientación general. El administrador le asignará su perfil y sus causas; cuando lo haga, lo verá al cambiar de pantalla.</p></div>`:"")+`<div class="card stack" style="gap:18px"><div class="row" style="gap:16px;align-items:flex-start;flex-wrap:nowrap">${emb("md")}<p class="big">Con este perfil puede usar la orientación general sobre cómo funciona un proceso. No puede ver expedientes.</p></div><div class="row"><button class="btn" data-act="go" data-v="orientacion">${ic("chat")}Ir a orientación</button>${!ON.activo||ON.preview?`<button class="btn sec" data-act="go" data-v="estado">${ic("lock")}Intentar abrir el expediente</button>`:""}</div></div>`+avisosHTML(ON.avisos,PAG().avisosT);
  const tec=!clear();
  const t1=L?`<div class="ringrow"><div class="ringbox" role="img" aria-label="${L.transcurridos} de ${c.lapso} días">${ring(L.transcurridos/c.lapso)}<div class="ringc"><b class="num">${L.restantes}</b><span>de ${c.lapso}</span></div></div>
  <p>${tec?"días de despacho restantes para "+c.verbT:"días de despacho quedan para "+c.verbC}</p></div>`
@@ -1429,7 +1432,7 @@ const GUIDE=[
  {g:"Ciberseguridad",t:"Bitácora",d:"Verifique la cadena. Simule una alteración y vuelva a verificar.",r:"secretaria",s:"bitacora"}
 ];
 const COMO=[
- ["users","Cuentas y perfiles","Cada persona crea su cuenta con un usuario y una contraseña. Entra con acceso de orientación general y el administrador le asigna su perfil: Juez, Secretaría, Abogado, Justiciable o Tercero."],
+ ["users","Cuentas y perfiles","Cada persona crea su cuenta con un usuario y una contraseña. Entra con acceso de orientación general y el administrador le asigna su perfil: Juez(a), Secretaria(o), Abogado(a), Justiciable o Asistente."],
  ["shield","Permisos que decide el administrador","Cada perfil trae permisos sugeridos y el administrador puede encender o apagar pantallas y acciones por persona, y vincular causas a abogados y justiciables. La base de datos los hace cumplir, no solo la pantalla."],
  ["user","Cómo se entra","Con su usuario y su contraseña, directo a su perfil. Juez y Secretaría abren cualquier causa del tribunal desde la lista de causas."],
  ["checkc","Qué es real","Las cuentas, los permisos, las validaciones, el calendario y la bitácora se guardan en una base de datos SQL. El cálculo de los días de despacho y la huella SHA-256 de cada documento se calculan de verdad."],
@@ -1526,7 +1529,7 @@ A.demo=()=>"keep";
 A.salirdemo=()=>{S.demo=false;S.pending=null};
 /* Acceso rápido de demostración: entra con las cuentas de prueba (clave 1234). Para quitarlo: ACCESO_RAPIDO=false */
 const ACCESO_RAPIDO=true,CLAVE_DEMO="1234";
-const RAPIDO=[["juez","Juez","gavel"],["secretaria","Secretaría","clip"],["abogado","Abogado","brief"],["justiciable","Justiciable","user"],["tercero","Tercero","userx"]];
+const RAPIDO=[["juez","Juez(a)","gavel"],["secretaria","Secretaria(o)","clip"],["abogado","Abogado(a)","brief"],["justiciable","Justiciable","user"],["tercero","Asistente","userx"]];
 A.entrar=()=>entrarCon((($("#lEmail")||{}).value||"").trim(),($("#lPass")||{}).value||"");
 A.rapido=v=>{if(!ACCESO_RAPIDO)return"keep";entrarCon(v,CLAVE_DEMO)};
 function entrarCon(usu,pass){const email=aEmail(usu);ON.form.email=usu;ON.msg="";
